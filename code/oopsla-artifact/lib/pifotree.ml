@@ -29,9 +29,8 @@ let rec size (t : t) : int =
   | Leaf p -> Pifo.length p
   | Internal (qs, _p) -> List.fold_left (fun acc q -> acc + size q) 0 qs
 
-let pifo_count_occ p ele = Pifo.count (fun (v, _) -> v = ele) p
-
 let rec well_formed (t : t) : bool =
+  let pifo_count_occ p ele = Pifo.count (fun (v, _) -> v = ele) p in
   match t with
   | Leaf _ -> true
   | Internal (qs, p) ->
@@ -41,3 +40,16 @@ let rec well_formed (t : t) : bool =
           && pifo_count_occ p i = size (List.nth qs i))
       done;
       true
+
+let rec snapshot (t : t) : Packet.t list list =
+  match t with
+  | Leaf p -> [ List.map fst (Pifo.flush p) ]
+  | Internal (qs, _p) -> List.fold_left (fun acc q -> acc @ snapshot q) [] qs
+
+let rec flush (t : t) : Packet.t list =
+  match size t with
+  | 0 -> []
+  | _ -> (
+      match pop t with
+      | None -> failwith "Flush: malformed tree."
+      | Some (pkt, q') -> flush q' @ [ pkt ])

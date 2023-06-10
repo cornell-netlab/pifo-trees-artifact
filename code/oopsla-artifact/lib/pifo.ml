@@ -10,3 +10,13 @@ let length = Fheap.length
 
 let count f t =
   List.fold_left (fun acc x -> if f x then acc + 1 else acc) 0 (Fheap.to_list t)
+
+let flush t =
+  let rec aux acc =
+    match peek t with
+    | None -> acc
+    | Some x ->
+        ignore (pop_exn t);
+        aux (x :: acc)
+  in
+  aux []
