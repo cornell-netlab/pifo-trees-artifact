@@ -2,9 +2,11 @@
 opam-version: "2.0"
 synopsis: "Programmable packet scheduling"
 description:
-  "Extends Sivaraman et. al.'s PIFO Trees model with lazy housekeeping"
+  "Formalizes and extends Sivaraman et. al.'s PIFO Tree model as described in https://arxiv.org/pdf/2211.11659.pdf"
 maintainer: ["Anshuman Mohan"]
-authors: ["Anshuman Mohan" "Tobias Kappe" "Dexter Kozen" "Nate Foster"]
+authors: [
+  "Anshuman Mohan" "Yunhe Liu" "Tobias Kappe" "Dexter Kozen" "Nate Foster"
+]
 homepage: "https://github.com/cornell-netlab/pifo-trees"
 bug-reports: "https://github.com/cornell-netlab/pifo-trees/issues"
 depends: [
