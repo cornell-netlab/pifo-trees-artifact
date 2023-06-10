@@ -4,3 +4,4 @@ type t =
 
 val pop : t -> (Packet.meta * t) option
 val push : t -> Packet.meta -> Path.t -> t
+val size : t -> int

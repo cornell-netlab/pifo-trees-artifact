@@ -22,3 +22,22 @@ let rec push (t : t) (pkt : Packet.t) (path : Path.t) : t =
       let q' = push (List.nth qs i) pkt pt in
       Internal (replace_nth qs i q', p')
   | _ -> failwith "Push: invalid path"
+
+let rec size (t : t) : int =
+  (* The size of a PIFO tree is the number of packets in its leaves. *)
+  match t with
+  | Leaf p -> Pifo.length p
+  | Internal (qs, _p) -> List.fold_left (fun acc q -> acc + size q) 0 qs
+
+let pifo_count_occ p ele = Pifo.count (fun (v, _) -> v = ele) p
+
+let rec well_formed (t : t) : bool =
+  match t with
+  | Leaf _ -> true
+  | Internal (qs, p) ->
+      for i = 0 to List.length qs - 1 do
+        assert (
+          well_formed (List.nth qs i)
+          && pifo_count_occ p i = size (List.nth qs i))
+      done;
+      true
