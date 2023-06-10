@@ -1,1 +1,1 @@
-type t = Star of t | Node of t list
+type t = Star | Node of t list
