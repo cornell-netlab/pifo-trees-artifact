@@ -2,20 +2,25 @@ type t = Star | Node of t list
 
 let rec treeify pq : t =
   match Pifo.length pq with
-  | 0 -> failwith "Cannot treeify empty PQ"
+  | 0 -> failwith "Cannot treeify empty PQ."
   | 1 -> fst (Pifo.top_exn pq)
   | _ -> (
       let (first, ht), pq' = Pifo.pop_exn pq in
-      (* Found one tree with this height *)
+      (* Found one tree with some height `ht`. *)
       match Pifo.pop_if pq' (fun (_, ht') -> ht = ht') with
       | Some ((second, _), pq'') ->
-          (* ...and a second tree with the same height. *)
+          (* Now found a _second_ tree with the same height.
+             Make them siblings, push the new Node into the PQ, and proceed.
+          *)
           let new_tree = Node [ first; second ] in
           let pq''' = Pifo.push pq'' (new_tree, ht + 1) in
           treeify pq'''
       | None ->
-          (* no more elements of this ht! reinsert the first tree that we
-             extracted but with falsely-increased ht. *)
+          (* Found no more elements of this heigh `ht`!
+             Reinsert the first tree that we extracted,
+             but with a falsely-increased height.
+             Then proceed.
+          *)
           let pq'' = Pifo.push pq' (first, ht + 1) in
           treeify pq'')
 
@@ -25,24 +30,21 @@ let rec height t =
   | Node trees -> 1 + List.fold_left max 0 (List.map height trees)
 
 let to_binary t =
-  let rec to_binary_inner t : t =
+  let rec helper t : t =
     match t with
-    | Star | Node [ _ ] -> t
-    (* We don't do anything to Stars and Nodes with single children. *)
+    | Star -> t (* We don't do anything to Stars. *)
     | Node trees ->
-        let compiled_trees =
+        let trees' =
           List.map
             (fun t ->
-              let t' = to_binary_inner t in
+              let t' = helper t in
               (t', height t'))
             trees
         in
-        let pq = Pifo.of_list compiled_trees (fun (_, a) (_, b) -> a - b) in
-        (* we can clobber the topmost generated ID with our own
-           the same is true of the istransient status *)
+        let pq = Pifo.of_list trees' (fun (_, a) (_, b) -> a - b) in
         treeify pq
   in
-  to_binary_inner t
+  helper t
 
 let one_level_ternary : t = Node [ Star; Star; Star ]
 let two_level_binary : t = Node [ Star; Node [ Star; Star ] ]
