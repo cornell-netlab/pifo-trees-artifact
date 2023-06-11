@@ -1,4 +1,4 @@
-(* Ethernet Cstruct for preprocessor to work on *)
+(* Ethernet Cstruct for preprocessor to work on. *)
 
 [%%cstruct
 type ethernet = {
