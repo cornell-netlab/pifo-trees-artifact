@@ -27,6 +27,7 @@ module FCFS_Ternary = struct
        the float portion proper, but we do register the time of the packet's
        scheduling. This means that FCFS prevails overall.
        Doing the same thing at the leaves means that FCFS prevails there too.
+       Going forward, we will frequently give the the leaves FCFS scheduling in this way.
 
        Recall that the fist element of the foot of a path is ignored.
        | "A" -> ([ (0, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
@@ -48,15 +49,17 @@ end
 
 module Strict_Ternary = struct
   let scheduling_transaction (s : State.t) pkt time =
-    match find_flow pkt with
-    | "A" -> ([ (0, Rank.create 2.0 time); (0, Rank.create 0.0 time) ], s)
-    | "B" -> ([ (1, Rank.create 1.0 time); (0, Rank.create 0.0 time) ], s)
-    | "C" -> ([ (2, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
-    (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
-       The ranks at the root are set up to prefer C to B, and B to A.
-       At the leaves, we let FCFS prevail.
-    *)
-    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+    let int_for_root, rank_for_root =
+      (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
+         The ranks at the root are set up to prefer C to B, and B to A.
+      *)
+      match find_flow pkt with
+      | "A" -> (0, Rank.create 2.0 time)
+      | "B" -> (1, Rank.create 1.0 time)
+      | "C" -> (2, Rank.create 0.0 time)
+      | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+    in
+    ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s)
 
   let control : Control.t =
     {
@@ -73,10 +76,7 @@ module RRobin_Ternary = struct
   let scheduling_transaction s pkt time =
     let flow = find_flow pkt in
     let var_last_finish = Printf.sprintf "%s_last_finish" flow in
-    (* We will use this variable to read/write to state.
-       There are three flows, so we will end up creating three variables
-       over the course of the simulation.
-    *)
+    (* We will use this variable to read/write to state. *)
     let rank_for_root =
       if State.isdefined var_last_finish s then
         max (Time.to_float time) (State.lookup var_last_finish s)
@@ -86,15 +86,15 @@ module RRobin_Ternary = struct
       State.rebind var_last_finish (rank_for_root +. (100.0 /. 0.33)) s
     in
     let rank_for_root = Rank.create rank_for_root time in
-    match flow with
-    | "A" -> ([ (0, rank_for_root); (0, Rank.create 0.0 time) ], s')
-    | "B" -> ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
-    | "C" -> ([ (2, rank_for_root); (0, Rank.create 0.0 time) ], s')
-    (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
-       The ranks at the root are as computed just above.
-       At the leaves, we let FCFS prevail.
-    *)
-    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+    let int_for_root =
+      (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2. *)
+      match flow with
+      | "A" -> 0
+      | "B" -> 1
+      | "C" -> 2
+      | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+    in
+    ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s')
 
   let control : Control.t =
     {
@@ -108,7 +108,9 @@ module RRobin_Ternary = struct
 end
 
 let wfq_helper s weight var_last_finish pkt_len time : Rank.t * State.t =
-  (* The WFQ-style algorithms have a common pattern, so we lift it. *)
+  (* The WFQ-style algorithms have a common pattern,
+      so we lift it into this helper.
+  *)
   let rank =
     if State.isdefined var_last_finish s then
       max (Time.to_float time) (State.lookup var_last_finish s)
@@ -126,15 +128,15 @@ module WFQ_Ternary = struct
     let rank_for_root, s' =
       wfq_helper s weight var_last_finish (Packet.len pkt) time
     in
-    match flow with
-    | "A" -> ([ (0, rank_for_root); (0, Rank.create 0.0 time) ], s')
-    | "B" -> ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
-    | "C" -> ([ (2, rank_for_root); (0, Rank.create 0.0 time) ], s')
-    (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
-       The ranks at the root are as computed just above.
-       At the leaves, we let FCFS prevail.
-    *)
-    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+    let int_for_root =
+      (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2. *)
+      match flow with
+      | "A" -> 0
+      | "B" -> 1
+      | "C" -> 2
+      | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+    in
+    ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s')
 
   let control : Control.t =
     {
@@ -250,9 +252,7 @@ module TwoPol_Ternary = struct
           match flow with
           (* We want C to go to the right node's 0th child,
              D to the 1st child, and E to the 2nd child.
-             That goes into the integers: 0, 1, 2.
              Futher, we want to prioritize E over D and D over C.
-             That goes into the ranks: 2.0, 1.0, 0.0.
           *)
           | "C" -> (0, 2.0)
           | "D" -> (1, 1.0)
@@ -306,7 +306,7 @@ module ThreePol_Ternary = struct
         in
         ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
     (* In addition to WFQ at the root,
-       we must at the right node do round-robin between C, D, and EFG. *)
+       we must, at the right node, do round-robin between C, D, and EFG. *)
     | "C" ->
         let rank_for_root, s' =
           wfq_helper s
@@ -371,7 +371,6 @@ module ThreePol_Ternary = struct
             (Packet.len pkt) time
         in
         let int_for_right_right =
-          (* Just a quick help for choosing which leaf to finally take. *)
           match flow with
           | "E" -> 0
           | "F" -> 1
