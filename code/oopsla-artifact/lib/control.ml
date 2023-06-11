@@ -42,18 +42,18 @@ let simulate end_sim sleep pop_tick flow t =
           helper flow time 0.0 state tree' (Packet.punch_out pkt time :: ans)
     else
       (* If no pop-work is due, try to push. *)
-      match Flow.hd_tl flow with
+      match flow with
       (* No more packets to push. Sleep and recurse. *)
-      | None ->
+      | [] ->
           helper flow (Time.add_float time sleep) (tsp +. sleep) state tree ans
       (* We have a packet to push. *)
-      | Some (pkt, f') ->
+      | pkt :: flow' ->
           (* But is it ready to be scheduled? *)
-          if time >= pkt.time then
+          if time >= Packet.time pkt then
             (* Yes. Push it. *)
             let path, state' = t.z state pkt in
             let tree' = Pifotree.push t.q (Packet.punch_in pkt time) path in
-            helper f' time tsp state' tree' ans
+            helper flow' time tsp state' tree' ans
           else
             (* Packet wasn't ready to push.
                Sleep and recurse, restoring `flow` to its previous state. *)
@@ -61,7 +61,7 @@ let simulate end_sim sleep pop_tick flow t =
               (Time.add_float time sleep)
               (tsp +. sleep) state tree ans
   in
-  let time = Flow.first_pkt_time flow in
+  let time = Packet.time (List.hd flow) in
   Random.init 42;
   helper flow time 0.0 t.s t.q []
 (* It proves useful to extract and pass copies of the state (t.s) and tree (t.q).
