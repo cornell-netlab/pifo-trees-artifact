@@ -69,7 +69,7 @@ def flesh_out_plot(f, df):
 
 def make_plot(df, subplt, name):
 
-    print(f"Algorithm {name} had length {len(df)}")
+    # print(f"Algorithm {name} had length {len(df)}")
 
     fig, f1 = subplt.subplots(1, 1)
     fig.set_size_inches(10, 5, forward=True)
@@ -84,8 +84,8 @@ def make_plot(df, subplt, name):
 
 
 def plot():
-    for i in ["fcfs"]:
-    # , "strict", "rr", "wfq", "hpfq"]:
+    for i in ["strict"]:
+        #   "fcfs", "strict", "rr", "wfq", "hpfq"]:
         #   "fcfs_bin", "strict_bin", "rr_bin", "fair_bin", "mrg_bin"]:
         # for j in range(1, 3):
         df = pd.read_csv(f"_build/output{i}.csv")

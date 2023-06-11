@@ -16,18 +16,6 @@ let find_flow p =
   | 123628225065072 -> "G" (* 70...*)
   | n -> failwith Printf.(sprintf "Unknown source address: %d." n)
 
-let findpath_one_level_ternary pkt =
-  (* The eventual goal is to arrive at the Path.t for this packet to be
-     inserted into a PIFO tree having the topology one_level_ternary.
-     This function get us part of the way there:
-     it tells us the route, but not the ranks.
-  *)
-  match find_flow pkt with
-  | "A" -> [ 0 ]
-  | "B" -> [ 1 ]
-  | "C" -> [ 2 ]
-  | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
-
 module FCFS_Ternary = struct
   let scheduling_transaction (s : State.t) pkt time =
     match find_flow pkt with
@@ -44,6 +32,29 @@ module FCFS_Ternary = struct
        | "A" -> ([ (0, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
                                               ^^^
                                             ignored
+    *)
+    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+
+  let control : Control.t =
+    {
+      s = State.create 1;
+      q = Pifotree.create Topo.one_level_ternary;
+      z = scheduling_transaction;
+    }
+
+  let simulate end_time pkts =
+    Control.simulate end_time 0.001 poprate pkts control
+end
+
+module Strict_Ternary = struct
+  let scheduling_transaction (s : State.t) pkt time =
+    match find_flow pkt with
+    | "A" -> ([ (0, Rank.create 2.0 time); (0, Rank.create 0.0 time) ], s)
+    | "B" -> ([ (1, Rank.create 1.0 time); (0, Rank.create 0.0 time) ], s)
+    | "C" -> ([ (2, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
+    (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
+       The ranks at the root are set up to prefer C to B, and B to A.
+       At the leaves, we let FCFS prevail.
     *)
     | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
