@@ -32,7 +32,8 @@ let simulate end_sim sleep pop_tick flow t =
       (* No more ripe packets in tree. Recurse with tsp = 0.0. *)
       | None -> helper flow time 0.0 s q ans
       (* Made progress by popping. Add to answer and recurse. *)
-      | Some (pkt, q') -> helper flow time 0.0 s q' (pkt :: ans)
+      | Some (pkt, q') ->
+          helper flow time 0.0 s q' (Packet.punch_out pkt time :: ans)
     else
       (* If no pop-work is due, try to push. *)
       match Flow.hd_tl flow with
@@ -41,10 +42,10 @@ let simulate end_sim sleep pop_tick flow t =
       (* We have a packet to push. *)
       | Some (pkt, f') ->
           (* But is it ready to be scheduled? *)
-          if time >= (Packet.to_meta pkt).time then
+          if time >= pkt.time then
             (* Yes. Push it. *)
             let path, s' = t.z s pkt in
-            let q' = Pifotree.push t.q pkt path in
+            let q' = Pifotree.push t.q (Packet.punch_in pkt time) path in
             helper f' time tsp s' q' ans
           else
             (* Packet wasn't ready to push.

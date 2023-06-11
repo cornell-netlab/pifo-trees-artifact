@@ -52,8 +52,8 @@ let create filename =
   (* print_string "opened file\n";  *)
   { header = create_pcap_header h buf; packets = create_packets h body }
 
-let last_pkt_time flow = (Packet.to_meta (List.hd (List.rev flow.packets))).time
-let first_pkt_time flow = (Packet.to_meta (List.hd flow.packets)).time
+let last_pkt_time flow = (List.hd (List.rev flow.packets)).time
+let first_pkt_time flow = (List.hd flow.packets).time
 let packets flow = flow.packets
 
 let hd_tl flow =

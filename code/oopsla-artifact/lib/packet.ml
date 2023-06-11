@@ -3,9 +3,12 @@ open Ethernet
 
 type packet_header_t = { time : Time.t; size_incl : int32; size_actu : int32 }
 type ethernet_t = { dst : int; src : int }
-type t = { header : packet_header_t; payload : ethernet_t }
+type complete = { header : packet_header_t; payload : ethernet_t }
 
-type meta = {
+type t = {
+  (* We will mostly pass around the lighter-weight metadata of packets,
+     not the whole thing.
+  *)
   time : Time.t;
   len : int;
   src : int;
@@ -15,7 +18,7 @@ type meta = {
   pka : int list;
 }
 
-let to_meta p =
+let complete_to_meta p =
   {
     time = p.header.time;
     len = Int32.to_int p.header.size_incl;
@@ -48,14 +51,16 @@ let create h (ph, pb) =
       dst = hex_to_int (Hex.of_string (copy_ethernet_dst pb));
     }
   in
-  { header; payload }
+  complete_to_meta { header; payload }
 
-let sprint pkt =
-  let meta = to_meta pkt in
-  Printf.sprintf "src  : %d\ndst  : %d\nlen  : %d\ntime : %f" meta.src meta.dst
-    meta.len (Time.to_float meta.time)
+let sprint t =
+  Printf.sprintf "src  : %d\ndst  : %d\nlen  : %d\ntime : %f" t.src t.dst t.len
+    (Time.to_float t.time)
 
-let write_to_csv metas overdue filename =
+let punch_in t time = { t with pushed = Some time }
+let punch_out t time = { t with popped = Some time }
+
+let write_to_csv ts overdue filename =
   let format_to_csv metas overdue =
     let headers =
       "\"src\", \"dst\", \"arrived\", \"length\", \"pushed\", \"popped\""
@@ -74,6 +79,6 @@ let write_to_csv metas overdue filename =
     Printf.sprintf "%s\n%s" headers
       (String.concat "\n" (List.map format_one_to_csv metas))
   in
-  let payload = format_to_csv metas overdue in
+  let payload = format_to_csv ts overdue in
   let ecsv = Csv.input_all (Csv.of_string payload) in
   Csv.save filename ecsv

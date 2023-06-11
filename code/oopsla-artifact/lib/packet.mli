@@ -1,8 +1,6 @@
 open Pcap
 
-type t
-
-type meta = {
+type t = {
   time : Time.t;
   len : int;
   src : int;
@@ -12,7 +10,8 @@ type meta = {
   pka : int list;
 }
 
-val to_meta : t -> meta
 val create : (module HDR) -> Cstruct.t * Cstruct.t -> t
 val sprint : t -> string
-val write_to_csv : meta list -> Time.t -> string -> unit
+val write_to_csv : t list -> Time.t -> string -> unit
+val punch_in : t -> Time.t -> t
+val punch_out : t -> Time.t -> t
