@@ -7,24 +7,32 @@ let add_to_state t = State.rebind t.s
 let mod_sched t z = { t with z }
 
 let simulate end_sim sleep pop_tick flow t =
-  (* Now we need to become sensitive to _time_.
-      We cannot just push packets as fast as possible, not can we pop
-      the tree as fast as possible.
-
-      The user gives us:
-      - end_sim: when to stop simulating
-      - sleep: how long to sleep when there's no work to do
-      - pop_tick: a threshold for when next to try a Pop
-      - flow: the packet flow to simulate, essentially a list of packets.
-      - t: the control to simulate over
+  (* The user gives us:
+     - `end_sim`: when to stop simulating.
+     - `sleep`: how long to sleep when there's no work to do.
+     - `pop_tick`: a threshold for when next to try a Pop.
+     - `flow`: the packet flow to simulate, essentially a list of packets.
+     - `t`: the control to simulate over.
 
      We assume that `flow` is ordered by packet time.
      We start the simulation at the time of the first packet in `flow`.
      We simulate until `end_sim`.
+
+     We need to become sensitive to _time_.
+     We cannot just push packets as fast as possible,
+     and we cannot pop the tree as fast as possible.
+
      A packet can be pushed only once its time has arrived.
+     For instance, if packet `n` is registered in `flow` as arriving 5 seconds
+     after the first packet, it will only be pushed into the tree 5 (or more)
+     seconds after the simulation starts.
      The tree can be popped only if the time since the last pop is greater than `pop_tick`.
+     This allows us to play with `pop_tick` and therfore saturate the tree.
   *)
   let rec helper flow time tsp s q ans =
+    (* `tsp` is "time since pop". `s` is the state. `q` is the tree.
+       The other fields are self-explanatory.
+    *)
     if time >= end_sim then List.rev ans
     else if tsp >= pop_tick then
       (* Let's try to pop. *)
@@ -55,7 +63,7 @@ let simulate end_sim sleep pop_tick flow t =
   let time = Flow.first_pkt_time flow in
   Random.init 42;
   helper flow time 0.0 t.s t.q []
-(* It proves useful to pass in copies of the state (t.s) and tree (t.q).
+(* It proves useful to extract and pass copies of the state (t.s) and tree (t.q).
    The scheduling transaction (t.z) does not tend to change during a simulation,
    so we don't pass it in.
 *)
