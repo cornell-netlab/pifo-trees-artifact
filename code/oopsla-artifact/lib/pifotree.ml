@@ -57,23 +57,10 @@ let rec flush t =
       | None -> failwith "Flush: malformed tree."
       | Some (pkt, q') -> flush q' @ [ pkt ])
 
-let _nodepifo_cmp (_, (r1, t1)) (_, (r2, t2)) =
-  (* We want FIFO order in case of rank-based ties *)
-  let r = Rank.cmp r1 r2 in
-  if r == 0 then (
-    let t = Time.cmp t1 t2 in
-    if t == 0 then
-      Printf.printf "Warning: packets clashed both in rank and time\n";
-    t)
-  else r
-
-let nodepifo_cmp_time_unaware (_, r1) (_, r2) = Rank.cmp r1 r2
-(* Until we are forced to deal with time. *)
-
 let rec create (topo : Topo.t) =
   match topo with
   | Star -> Leaf (Pifo.create (fun (_, a) (_, b) -> Rank.cmp a b))
   | Node topos ->
       let qs = List.map create topos in
-      let p = Pifo.create (fun a b -> nodepifo_cmp_time_unaware a b) in
+      let p = Pifo.create (fun (_, a) (_, b) -> Rank.cmp a b) in
       Internal (qs, p)

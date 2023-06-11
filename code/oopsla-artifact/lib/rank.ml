@@ -1,8 +1,8 @@
-type t = float
+type t = float * Time.t
 
-let cmp t1 t2 =
-  let diff = t1 -. t2 in
-  if diff < 0.0 then -1 else if diff = 0.0 then 0 else 1
+let cmp (r1, t1) (r2, t2) =
+  (* If the float portions are identical, try to break ties using time. *)
+  if r1 == r2 then Time.cmp t1 t2 else if r1 -. r2 < 0. then -1 else 1
 
-let to_float t = t
-let of_float t = t
+let create f t = (f, t)
+let time (_, t) = t

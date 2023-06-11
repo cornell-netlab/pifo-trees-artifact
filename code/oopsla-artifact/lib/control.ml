@@ -1,4 +1,4 @@
-type sched_t = State.t -> Packet.t -> Path.t * State.t
+type sched_t = State.t -> Packet.t -> Time.t -> Path.t * State.t
 type t = { s : State.t; q : Pifotree.t; z : sched_t }
 
 let add_to_state t = State.rebind t.s
@@ -67,7 +67,7 @@ let simulate sim_length sleep pop_tick flow t =
           (* But is it ready to be scheduled? *)
           if time >= Packet.time pkt then
             (* Yes. Push it. *)
-            let path, state' = t.z state pkt in
+            let path, state' = t.z state pkt time in
             let tree' = Pifotree.push tree (Packet.punch_in pkt time) path in
             (* Recurse with tsp = 0.0. *)
             helper flow' time tsp state' tree' ans

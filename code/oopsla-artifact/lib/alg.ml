@@ -29,15 +29,21 @@ let findpath_one_level_ternary pkt =
   | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
 module FCFS_Ternary = struct
-  let scheduling_transaction (s : State.t) pkt =
+  let scheduling_transaction (s : State.t) pkt time =
     match find_flow pkt with
-    | "A" -> ([ (0, Rank.of_float 0.0); (0, Rank.of_float 0.0) ], s)
-    | "B" -> ([ (1, Rank.of_float 0.0); (0, Rank.of_float 0.0) ], s)
-    | "C" -> ([ (2, Rank.of_float 0.0); (0, Rank.of_float 0.0) ], s)
+    | "A" -> ([ (0, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
+    | "B" -> ([ (1, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
+    | "C" -> ([ (2, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
     (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
-       The ranks at the root are kept the same (0), so FCFS prevails overall.
-       The ranks at the leaves are also kept the same (0), so FCFS prevails at the leaves.
+       The ranks at the root are straightforward: nothing fancy to do with
+       the float portion proper, but we do register the time of the packet's
+       scheduling. This means that FCFS prevails overall.
+       Doing the same thing at the leaves means that FCFS prevails there too.
+
        Recall that the fist element of the foot of a path is ignored.
+       | "A" -> ([ (0, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
+                                              ^^^
+                                            ignored
     *)
     | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 

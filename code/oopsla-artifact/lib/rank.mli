@@ -1,5 +1,5 @@
 type t
 
 val cmp : t -> t -> int
-val to_float : t -> float
-val of_float : float -> t
+val create : float -> Time.t -> t
+val time : t -> Time.t
