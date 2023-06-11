@@ -155,70 +155,51 @@ module HPFQ_Binary = struct
   let scheduling_transaction s pkt time =
     let flow = find_flow pkt in
     (* this is either A, B, or C.
-       When computing ranks for the root, we group them into two: AB or C.
-       When computing ranks for the left node, we group them into two: A or B.
+       When computing ranks for the root, we arbitrate between {AB} or {C}.
+       When computing ranks for the left node, we arbitrate between {A} or {B}.
     *)
-    let flow_root =
-      match flow with
-      | "A" | "B" -> "AB"
-      | "C" -> "C"
-      | _ -> failwith "Impossible."
-    in
-    (* Let's compute the rank (arbitrating between AB and C)
-       and the new state from the root's PoV. *)
-    let var_last_finish_root = Printf.sprintf "%s_last_finish" flow_root in
-    let var_weight_root = Printf.sprintf "%s_weight" flow_root in
-    let rank_for_root =
-      if State.isdefined var_last_finish_root s then
-        max (Time.to_float time) (State.lookup var_last_finish_root s)
-      else Time.to_float time
-    in
-    let weight_root = State.lookup var_weight_root s in
-    let s' =
-      State.rebind var_last_finish_root
-        (rank_for_root +. (Packet.len pkt /. weight_root))
-        s
-    in
-    let rank_for_root = Rank.create rank_for_root time in
-    (* Now let's compute the rank (arbitrating between A and B)
-       and the new state from the left node's PoV. *)
-    let rank_for_left, new_state =
-      match flow with
-      | "A" | "B" ->
-          let var_last_finish_left = Printf.sprintf "%s_last_finish" flow in
-          let var_weight_left = Printf.sprintf "%s_weight" flow in
-          let rank_for_left =
-            if State.isdefined var_last_finish_left s then
-              max (Time.to_float time) (State.lookup var_last_finish_left s)
-            else Time.to_float time
-          in
-          let weight_left = State.lookup var_weight_left s in
-          let s'' =
-            State.rebind var_last_finish_left
-              (rank_for_left +. (Packet.len pkt /. weight_left))
-              s'
-          in
-          (Rank.create rank_for_left time, s'')
-      | "C" ->
-          (Rank.create 0.0 time, s')
-          (* Won't use this, so we create a no-op rank and leave the state unchanged. *)
-      | _ -> failwith "Impossible."
-    in
-    (* Now we can put it all together. *)
     match flow with
     | "A" ->
-        ( [ (0, rank_for_root); (0, rank_for_left); (0, Rank.create 0.0 time) ],
-          new_state )
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "AB_weight" s)
+            "AB_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_left_node, s'' =
+          wfq_helper s'
+            (State.lookup "A_weight" s')
+            "A_last_finish" (Packet.len pkt) time
+        in
+        ( [
+            (0, rank_for_root);
+            (0, rank_for_left_node);
+            (0, Rank.create 0.0 time);
+          ],
+          s'' )
     | "B" ->
-        ( [ (0, rank_for_root); (1, rank_for_left); (0, Rank.create 0.0 time) ],
-          new_state )
-    | "C" -> ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], new_state)
-    (* Put flow A into node 0's 0th leaf,
-       flow B into node 0's 1st leaf,
-       and flow C into node 1.
-       The ranks at the root are as computed just above.
-       At the leaves, we let FCFS prevail.
-    *)
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "AB_weight" s)
+            "AB_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_left_node, s'' =
+          wfq_helper s'
+            (State.lookup "B_weight" s')
+            "B_last_finish" (Packet.len pkt) time
+        in
+        ( [
+            (0, rank_for_root);
+            (1, rank_for_left_node);
+            (0, Rank.create 0.0 time);
+          ],
+          s'' )
+    | "C" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "C_weight" s)
+            "C_last_finish" (Packet.len pkt) time
+        in
+        ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
     | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
   let control : Control.t =
