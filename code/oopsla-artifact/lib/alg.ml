@@ -107,23 +107,25 @@ module RRobin_Ternary = struct
     Control.simulate end_time 0.001 poprate pkts control
 end
 
+let wfq_helper s weight var_last_finish pkt_len time : Rank.t * State.t =
+  (* The WFQ-style algorithms have a common pattern, so we lift it. *)
+  let rank =
+    if State.isdefined var_last_finish s then
+      max (Time.to_float time) (State.lookup var_last_finish s)
+    else Time.to_float time
+  in
+  let s' = State.rebind var_last_finish (rank +. (pkt_len /. weight)) s in
+  (Rank.create rank time, s')
+
 module WFQ_Ternary = struct
   let scheduling_transaction s pkt time =
     let flow = find_flow pkt in
     let var_last_finish = Printf.sprintf "%s_last_finish" flow in
     let var_weight = Printf.sprintf "%s_weight" flow in
-    let rank_for_root =
-      if State.isdefined var_last_finish s then
-        max (Time.to_float time) (State.lookup var_last_finish s)
-      else Time.to_float time
-    in
     let weight = State.lookup var_weight s in
-    let s' =
-      State.rebind var_last_finish
-        (rank_for_root +. (float_of_int (Packet.len pkt) /. weight))
-        s
+    let rank_for_root, s' =
+      wfq_helper s weight var_last_finish (Packet.len pkt) time
     in
-    let rank_for_root = Rank.create rank_for_root time in
     match flow with
     | "A" -> ([ (0, rank_for_root); (0, Rank.create 0.0 time) ], s')
     | "B" -> ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
@@ -174,7 +176,7 @@ module HPFQ_Binary = struct
     let weight_root = State.lookup var_weight_root s in
     let s' =
       State.rebind var_last_finish_root
-        (rank_for_root +. (float_of_int (Packet.len pkt) /. weight_root))
+        (rank_for_root +. (Packet.len pkt /. weight_root))
         s
     in
     let rank_for_root = Rank.create rank_for_root time in
@@ -193,7 +195,7 @@ module HPFQ_Binary = struct
           let weight_left = State.lookup var_weight_left s in
           let s'' =
             State.rebind var_last_finish_left
-              (rank_for_left +. (float_of_int (Packet.len pkt) /. weight_left))
+              (rank_for_left +. (Packet.len pkt /. weight_left))
               s'
           in
           (Rank.create rank_for_left time, s'')
