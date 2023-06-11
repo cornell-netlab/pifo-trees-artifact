@@ -40,15 +40,19 @@ let simulate sim_length sleep pop_tick flow t =
         Printf.printf
           "Warning: not every packet was popped at the time simulation ended.\n";
       List.rev ans)
-    else if tsp >= pop_tick then
-      (* Let's try to pop. *)
-      match Pifotree.pop tree with
-      (* No more ripe packets in tree. Recurse with tsp = 0.0. *)
-      | None -> helper flow time 0.0 state tree ans
-      (* Made progress by popping. Add to answer and recurse. *)
-      | Some (pkt, tree') ->
-          (* Printf.printf ">> Popped packet at time %f.\n" (Time.to_float time); *)
-          helper flow time 0.0 state tree' (Packet.punch_out pkt time :: ans)
+    else if tsp >= pop_tick then (
+      if Pifotree.size tree = 0 then
+        (* The simulator was ready to pop, but there were no packets in the tree.
+           Recurse with tsp = 0.0.
+        *)
+        helper flow time 0.0 state tree ans
+      else
+        match Pifotree.pop tree with
+        | None -> failwith "The tree was nonempty, but pop returned None."
+        | Some (pkt, tree') ->
+            Printf.printf ">> Popped packet at time %f.\n" (Time.to_float time);
+            (* Made progress by popping. Add to answer and recurse. *)
+            helper flow time 0.0 state tree' (Packet.punch_out pkt time :: ans))
     else
       (* If no pop-work is due, try to push. *)
       match flow with
@@ -58,13 +62,13 @@ let simulate sim_length sleep pop_tick flow t =
       (* We have a packet to push. *)
       | pkt :: flow' ->
           (* But is it ready to be scheduled? *)
-          if time >= Packet.time pkt then
+          if time >= Packet.time pkt then (
             (* Yes. Push it. *)
             let path, state' = t.z state pkt in
             let tree' = Pifotree.push t.q (Packet.punch_in pkt time) path in
-            (* Printf.printf "Pushed packet at time %f.\n" (Time.to_float time); *)
+            Printf.printf "Pushed packet at time %f.\n" (Time.to_float time);
             (* Recurse with tsp = 0.0. *)
-            helper flow' time tsp state' tree' ans
+            helper flow' time tsp state' tree' ans)
           else
             (* Packet wasn't ready to push.
                Sleep and recurse, restoring `flow` to its previous state. *)
