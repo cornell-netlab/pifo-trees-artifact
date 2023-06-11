@@ -27,4 +27,5 @@ let _ =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
   run Strict_Ternary.simulate strict_flow "strict";
   run RRobin_Ternary.simulate rr_flow "rr";
-  run WFQ_Ternary.simulate wfq_flow "wfq"
+  run WFQ_Ternary.simulate wfq_flow "wfq";
+  run HPFQ_Binary.simulate two_then_three "hpfq"
