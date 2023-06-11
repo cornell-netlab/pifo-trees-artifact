@@ -36,7 +36,7 @@ let create h (ph, pb) =
   let header =
     {
       time =
-        Time.of_floats
+        Time.of_ints
           (H.get_pcap_packet_ts_sec ph)
           (H.get_pcap_packet_ts_usec ph);
       size_incl = H.get_pcap_packet_incl_len ph;
