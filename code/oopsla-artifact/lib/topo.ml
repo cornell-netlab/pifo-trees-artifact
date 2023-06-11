@@ -47,5 +47,5 @@ let to_binary t =
   helper t
 
 let one_level_ternary : t = Node [ Star; Star; Star ]
-let two_level_binary : t = Node [ Star; Node [ Star; Star ] ]
-let _ = assert (to_binary one_level_ternary = two_level_binary)
+let _two_level_binary : t = Node [ Star; Node [ Star; Star ] ]
+(* let _ = assert (to_binary one_level_ternary = two_level_binary) *)

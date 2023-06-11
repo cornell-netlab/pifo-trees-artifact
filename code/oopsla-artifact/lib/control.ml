@@ -1,7 +1,5 @@
-type t = { s : State.t; q : Pifotree.t; z : Sched.t }
-
-let create topo =
-  { s = State.create 1; q = Pifotree.create topo; z = Sched.noop }
+type sched_t = State.t -> Packet.t -> Path.t * State.t
+type t = { s : State.t; q : Pifotree.t; z : sched_t }
 
 let add_to_state t = State.rebind t.s
 let mod_sched t z = { t with z }
@@ -34,7 +32,14 @@ let simulate sim_length sleep pop_tick flow t =
 
   let rec helper flow time tsp state tree ans =
     (* `tsp` is "time since pop". The other fields are self-explanatory. *)
-    if time >= end_time then List.rev ans
+    if time >= end_time then (
+      if flow <> [] then
+        Printf.printf
+          "Warning: not every packet was pushed at the time simulation ended.\n";
+      if Pifotree.size tree > 0 then
+        Printf.printf
+          "Warning: not every packet was popped at the time simulation ended.\n";
+      List.rev ans)
     else if tsp >= pop_tick then
       (* Let's try to pop. *)
       match Pifotree.pop tree with
@@ -42,6 +47,7 @@ let simulate sim_length sleep pop_tick flow t =
       | None -> helper flow time 0.0 state tree ans
       (* Made progress by popping. Add to answer and recurse. *)
       | Some (pkt, tree') ->
+          (* Printf.printf ">> Popped packet at time %f.\n" (Time.to_float time); *)
           helper flow time 0.0 state tree' (Packet.punch_out pkt time :: ans)
     else
       (* If no pop-work is due, try to push. *)
@@ -56,6 +62,8 @@ let simulate sim_length sleep pop_tick flow t =
             (* Yes. Push it. *)
             let path, state' = t.z state pkt in
             let tree' = Pifotree.push t.q (Packet.punch_in pkt time) path in
+            (* Printf.printf "Pushed packet at time %f.\n" (Time.to_float time); *)
+            (* Recurse with tsp = 0.0. *)
             helper flow' time tsp state' tree' ans
           else
             (* Packet wasn't ready to push.

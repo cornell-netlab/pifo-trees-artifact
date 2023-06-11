@@ -1,4 +1,4 @@
-from termios import CS5
+# from termios import CS5
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.patches import Patch
@@ -80,17 +80,16 @@ def make_plot(df, subplt, name):
     flesh_out_plot(f1, df1)
 
     # subplt.show()
-    subplt.savefig(
-        f"../notes/oopsla23/gallery/{name}", bbox_inches='tight')
+    subplt.savefig(name, bbox_inches='tight')
 
 
 def plot():
-    for i in ["fcfs", "strict", "rr", "wfq", "hpfq"]:
+    for i in ["fcfs"]:
+    # , "strict", "rr", "wfq", "hpfq"]:
         #   "fcfs_bin", "strict_bin", "rr_bin", "fair_bin", "mrg_bin"]:
         # for j in range(1, 3):
-        name = f"{i}"
-        df = pd.read_csv(f"_build/output{name}.csv")
-        make_plot(df, plt, name)
+        df = pd.read_csv(f"_build/output{i}.csv")
+        make_plot(df, plt, i)
     # for i in ["fair2tier", "fair2tier'", "fair3tier", "fairstrict2tier",
     #           "fair2tier_bin", "fair2tier'_bin", "fair3tier_bin",
     #           "fairstrict2tier_bin"]:

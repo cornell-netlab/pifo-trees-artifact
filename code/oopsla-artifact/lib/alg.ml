@@ -1,5 +1,4 @@
-let sleeptime = 0.0005
-let poprate = 0.25
+let poprate = 0.25 (* Four packets per second. *)
 
 let find_flow p =
   (* In pcap_gen.py, we create packets with sources based on their MAC addresses.
@@ -30,7 +29,24 @@ let findpath_one_level_ternary pkt =
   | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
 module FCFS_Ternary = struct
-  let control : Control.t = Control.create Topo.one_level_ternary
+  let scheduling_transaction (s : State.t) pkt =
+    match find_flow pkt with
+    | "A" -> ([ (0, Rank.of_float 0.0); (0, Rank.of_float 0.0) ], s)
+    | "B" -> ([ (1, Rank.of_float 0.0); (0, Rank.of_float 0.0) ], s)
+    | "C" -> ([ (2, Rank.of_float 0.0); (0, Rank.of_float 0.0) ], s)
+    (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
+       The ranks at the root are kept the same (0), so FCFS prevails overall.
+       The ranks at the leaves are also kept the same (0), so FCFS prevails at the leaves.
+       Recall that the fist element of the foot of a path is ignored.
+    *)
+    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+
+  let control : Control.t =
+    {
+      s = State.create 1;
+      q = Pifotree.create Topo.one_level_ternary;
+      z = scheduling_transaction;
+    }
 
   let simulate end_time pkts =
     Control.simulate end_time 0.001 poprate pkts control

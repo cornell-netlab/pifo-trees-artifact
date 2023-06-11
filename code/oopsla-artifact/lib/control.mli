@@ -1,6 +1,6 @@
-type t = { s : State.t; q : Pifotree.t; z : Sched.t }
+type sched_t = State.t -> Packet.t -> Path.t * State.t
+type t = { s : State.t; q : Pifotree.t; z : sched_t }
 
-val create : Topo.t -> t
 val add_to_state : t -> string -> float -> unit
-val mod_sched : t -> Sched.t -> t
+val mod_sched : t -> sched_t -> t
 val simulate : float -> float -> float -> Packet.t list -> t -> Packet.t list
