@@ -41,12 +41,8 @@ let rec well_formed t =
   match t with
   | Leaf _ -> true
   | Internal (qs, p) ->
-      for i = 0 to List.length qs - 1 do
-        assert (
-          well_formed (List.nth qs i)
-          && pifo_count_occ p i = size (List.nth qs i))
-      done;
-      true
+      List.fold_left ( && ) true
+        (List.mapi (fun i q -> well_formed q && pifo_count_occ p i = size q) qs)
 
 let rec snapshot t =
   match t with
