@@ -1,21 +1,21 @@
 open Pifotrees_lib
 open Alg
 
-let two_then_three = Packet.pkts_from_file "../pcaps/two_then_three.pcap"
-let five_flows = Packet.pkts_from_file "../pcaps/five_flows.pcap"
-let seven_flows = Packet.pkts_from_file "../pcaps/seven_flows.pcap"
 let fcfs_flow = Packet.pkts_from_file "../pcaps/fcfs_generated.pcap"
 let strict_flow = Packet.pkts_from_file "../pcaps/strict_generated.pcap"
 let rr_flow = Packet.pkts_from_file "../pcaps/rr_generated.pcap"
 let wfq_flow = Packet.pkts_from_file "../pcaps/wfq_generated.pcap"
+let two_then_three = Packet.pkts_from_file "../pcaps/two_then_three.pcap"
+let five_flows = Packet.pkts_from_file "../pcaps/five_flows.pcap"
+let seven_flows = Packet.pkts_from_file "../pcaps/seven_flows.pcap"
 
 let run simulate_fn flow name =
-  (* time after which to cut off simulation *)
+  (* Duration of time after which to cut off simulation. *)
   let sim_length = 20.0 in
   let c = simulate_fn sim_length flow in
-  (* how do we want to render pushed-but-unpopped items?
+  (* How do we want to render pushed-but-unpopped items?
    * false: blank lines
-   * true: colored lines that go until end_sim
+   * true: colored lines that go until the far right.
    *)
   let show_unpopped = false in
   let overdue =
