@@ -46,9 +46,27 @@ let to_binary t =
   in
   helper t
 
+let print_tree tree =
+  (* Just for fun, to see trees change as they are embedded. *)
+  let rec print_tree_helper space t : unit =
+    match t with
+    | Star -> Printf.printf "%s *\n" space
+    | Node trees ->
+        Printf.printf "%s *--------\n" space;
+        ignore (List.map (print_tree_helper (space ^ "\t")) trees)
+  in
+  print_tree_helper "" tree;
+  print_newline ()
+
 let one_level_ternary : t = Node [ Star; Star; Star ]
-let binary_three_leaves : t = Node [ Node [ Star; Star ]; Star ]
+let two_level_binary : t = Node [ Node [ Star; Star ]; Star ]
 let two_level_ternary : t = Node [ Star; Star; Node [ Star; Star; Star ] ]
 
 let three_level_ternary : t =
   Node [ Star; Star; Node [ Star; Star; Node [ Star; Star; Star ] ] ]
+
+let irregular : t = Node [ Star; Star; Star; Node [ Star; Star; Star ] ]
+
+let irregular_binary : t =
+  Node
+    [ Node [ Node [ Star; Star ]; Star ]; Node [ Node [ Star; Star ]; Star ] ]

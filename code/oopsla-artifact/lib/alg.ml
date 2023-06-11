@@ -212,7 +212,7 @@ module HPFQ_Binary = struct
         |> State.rebind "A_weight" 0.75
         |> State.rebind "B_weight" 0.25
         |> State.rebind "C_weight" 0.2;
-      q = Pifotree.create Topo.binary_three_leaves;
+      q = Pifotree.create Topo.two_level_binary;
       z = scheduling_transaction;
     }
 

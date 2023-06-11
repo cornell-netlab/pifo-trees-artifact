@@ -23,6 +23,11 @@ let run simulate_fn flow name =
   in
   Packet.write_to_csv c overdue (Printf.sprintf "../../output%s.csv" name)
 
+let embedding =
+  (* Embedding: Figure 3 *)
+  assert (Topo.to_binary Topo.one_level_ternary = Topo.two_level_binary);
+  assert (Topo.to_binary Topo.irregular = Topo.irregular_binary)
+
 let _ =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
   run Strict_Ternary.simulate strict_flow "strict";
