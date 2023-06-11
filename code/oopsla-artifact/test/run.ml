@@ -25,6 +25,6 @@ let run simulate_fn flow name =
 
 let _ =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
-  run Strict_Ternary.simulate strict_flow "strict"
-(* run RoundRobin.simulate rr_flow "rr"; *)
+  run Strict_Ternary.simulate strict_flow "strict";
+  run RRobin_Ternary.simulate rr_flow "rr"
 (* run WFQ.simulate wfq_flow "wfq" *)
