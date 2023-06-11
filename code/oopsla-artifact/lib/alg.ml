@@ -154,9 +154,9 @@ end
 module HPFQ_Binary = struct
   let scheduling_transaction s pkt time =
     let flow = find_flow pkt in
-    (* this is either A, B, or C.
-       When computing ranks for the root, we arbitrate between {AB} or {C}.
-       When computing ranks for the left node, we arbitrate between {A} or {B}.
+    (* This is either A, B, or C.
+       When computing ranks for the root, we arbitrate between AB or C.
+       When computing ranks for the left node, we arbitrate between A or B.
     *)
     match flow with
     | "A" ->
@@ -211,6 +211,193 @@ module HPFQ_Binary = struct
         |> State.rebind "B_weight" 0.25
         |> State.rebind "C_weight" 0.2;
       q = Pifotree.create Topo.binary_three_leaves;
+      z = scheduling_transaction;
+    }
+
+  let simulate end_time pkts =
+    Control.simulate end_time 0.001 poprate pkts control
+end
+
+module TwoPol_Ternary = struct
+  let scheduling_transaction s pkt time =
+    let flow = find_flow pkt in
+    (* This is either A, B, C, D, or E.
+       When computing ranks for the root, we arbitrate between A, B, or CDE.
+       When computing ranks for the right node, we arbitrate between C, D, or E.
+    *)
+    match flow with
+    | "A" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "A_weight" s)
+            "A_last_finish" (Packet.len pkt) time
+        in
+        ([ (0, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "B" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "B_weight" s)
+            "B_last_finish" (Packet.len pkt) time
+        in
+        ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "C" | "D" | "E" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "CDE_weight" s)
+            "CDE_last_finish" (Packet.len pkt) time
+        in
+        let int_for_right, rank_for_right =
+          match flow with
+          (* We want C to go to the right node's 0th child,
+             D to the 1st child, and E to the 2nd child.
+             That goes into the integers: 0, 1, 2.
+             Futher, we want to prioritize E over D and D over C.
+             That goes into the ranks: 2.0, 1.0, 0.0.
+          *)
+          | "C" -> (0, 2.0)
+          | "D" -> (1, 1.0)
+          | "E" -> (2, 0.0)
+          | _ -> failwith "Impossible."
+        in
+        ( [
+            (2, rank_for_root);
+            (int_for_right, Rank.create rank_for_right time);
+            (0, Rank.create 0.0 time);
+          ],
+          s' )
+    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+
+  let control : Control.t =
+    {
+      s =
+        State.create 6
+        |> State.rebind "A_weight" 0.1
+        |> State.rebind "B_weight" 0.1
+        |> State.rebind "CDE_weight" 0.8;
+      q = Pifotree.create Topo.two_level_ternary;
+      z = scheduling_transaction;
+    }
+
+  let simulate end_time pkts =
+    Control.simulate end_time 0.001 poprate pkts control
+end
+
+module ThreePol_Ternary = struct
+  let scheduling_transaction s pkt time =
+    let flow = find_flow pkt in
+    (* This is either A, B, C, D, E, F, or G.
+       When computing ranks for the root, we arbitrate between A, B, or CDEFG.
+       When computing ranks for the right node, we arbitrate between C, D, or EFG.
+       When computing ranks for the right node's right node, we arbitrate between E, F, or G.
+    *)
+    match flow with
+    | "A" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "A_weight" s)
+            "A_last_finish" (Packet.len pkt) time
+        in
+        ([ (0, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "B" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "B_weight" s)
+            "B_last_finish" (Packet.len pkt) time
+        in
+        ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    (* In addition to WFQ at the root,
+       we must at the right node do round-robin between C, D, and EFG. *)
+    | "C" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "CDEFG_weight" s)
+            "CDEFG_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_right, s'' =
+          let r =
+            if State.isdefined "C_last_finish" s' then
+              max (Time.to_float time) (State.lookup "C_last_finish" s)
+            else Time.to_float time
+          in
+          let new_state =
+            State.rebind "C_last_finish" (r +. (100.0 /. 0.33)) s'
+          in
+          (Rank.create r time, new_state)
+        in
+        ( [ (2, rank_for_root); (0, rank_for_right); (0, Rank.create 0.0 time) ],
+          s'' )
+    | "D" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "CDEFG_weight" s)
+            "CDEFG_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_right, s'' =
+          let r =
+            if State.isdefined "D_last_finish" s' then
+              max (Time.to_float time) (State.lookup "D_last_finish" s)
+            else Time.to_float time
+          in
+          let new_state =
+            State.rebind "D_last_finish" (r +. (100.0 /. 0.33)) s'
+          in
+          (Rank.create r time, new_state)
+        in
+        ( [ (2, rank_for_root); (1, rank_for_right); (0, Rank.create 0.0 time) ],
+          s'' )
+    | "E" | "F" | "G" ->
+        (* In addition to WFQ at the root and round-robin at the right node,
+           we must do WFQ between E, F, and G at the right node's right node. *)
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "CDEFG_weight" s)
+            "CDEFG_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_right, s'' =
+          let r =
+            if State.isdefined "EFG_last_finish" s' then
+              max (Time.to_float time) (State.lookup "EFG_last_finish" s)
+            else Time.to_float time
+          in
+          let new_state =
+            State.rebind "EFG_last_finish" (r +. (100.0 /. 0.33)) s'
+          in
+          (Rank.create r time, new_state)
+        in
+        let rank_for_right_right, s''' =
+          wfq_helper s''
+            (State.lookup (Printf.sprintf "%s_weight" flow) s'')
+            (Printf.sprintf "%s_last_finish" flow)
+            (Packet.len pkt) time
+        in
+        let int_for_right_right =
+          (* Just a quick help for choosing which leaf to finally take. *)
+          match flow with
+          | "E" -> 0
+          | "F" -> 1
+          | "G" -> 2
+          | _ -> failwith "Impossible."
+        in
+        ( [
+            (2, rank_for_root);
+            (2, rank_for_right);
+            (int_for_right_right, rank_for_right_right);
+            (0, Rank.create 0.0 time);
+          ],
+          s''' )
+    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+
+  let control : Control.t =
+    {
+      s =
+        State.create 6
+        |> State.rebind "A_weight" 0.4
+        |> State.rebind "B_weight" 0.4
+        |> State.rebind "CDEFG_weight" 0.2
+        |> State.rebind "E_weight" 0.1
+        |> State.rebind "F_weight" 0.4
+        |> State.rebind "G_weight" 0.5;
+      q = Pifotree.create Topo.three_level_ternary;
       z = scheduling_transaction;
     }
 

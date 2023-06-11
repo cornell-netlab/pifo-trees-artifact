@@ -2,8 +2,8 @@ open Pifotrees_lib
 open Alg
 
 let two_then_three = Packet.pkts_from_file "../pcaps/two_then_three.pcap"
-let f3 = Packet.pkts_from_file "../pcaps/five_flows.pcap"
-let f4 = Packet.pkts_from_file "../pcaps/seven_flows.pcap"
+let five_flows = Packet.pkts_from_file "../pcaps/five_flows.pcap"
+let seven_flows = Packet.pkts_from_file "../pcaps/seven_flows.pcap"
 let fcfs_flow = Packet.pkts_from_file "../pcaps/fcfs_generated.pcap"
 let strict_flow = Packet.pkts_from_file "../pcaps/strict_generated.pcap"
 let rr_flow = Packet.pkts_from_file "../pcaps/rr_generated.pcap"
@@ -28,4 +28,6 @@ let _ =
   run Strict_Ternary.simulate strict_flow "strict";
   run RRobin_Ternary.simulate rr_flow "rr";
   run WFQ_Ternary.simulate wfq_flow "wfq";
-  run HPFQ_Binary.simulate two_then_three "hpfq"
+  run HPFQ_Binary.simulate two_then_three "hpfq";
+  run TwoPol_Ternary.simulate five_flows "twopol";
+  run ThreePol_Ternary.simulate seven_flows "threepol"
