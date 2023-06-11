@@ -1,9 +1,6 @@
 type sched_t = State.t -> Packet.t -> Time.t -> Path.t * State.t
 type t = { s : State.t; q : Pifotree.t; z : sched_t }
 
-let add_to_state t = State.rebind t.s
-let mod_sched t z = { t with z }
-
 let simulate sim_length sleep pop_tick flow t =
   (* The user gives us:
      - `sim_length`: after how many seconds to stop simulating.

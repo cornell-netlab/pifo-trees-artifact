@@ -4,8 +4,8 @@ type t = (string, float) Hashtbl.t
 
 let create size = create size
 
-let lookup h v =
-  try Hashtbl.find h v
+let lookup v t =
+  try Hashtbl.find t v
   with Not_found -> failwith (Printf.sprintf "Uninitialized variable: %s" v)
 
 (* we do a more aggressive rebind because
@@ -14,8 +14,9 @@ let lookup h v =
      _That is, after performing Hashtbl.remove tbl key,
      the previous binding for key, if any, is restored._"
 *)
-let rebind h k v =
-  Hashtbl.remove h k;
-  Hashtbl.add h k v
+let rebind k v t =
+  Hashtbl.remove t k;
+  Hashtbl.add t k v;
+  t
 
-let isdefined = Hashtbl.mem
+let isdefined mem t = Hashtbl.mem t mem

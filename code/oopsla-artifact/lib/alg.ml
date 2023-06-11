@@ -71,7 +71,6 @@ end
 
 module RRobin_Ternary = struct
   let scheduling_transaction s pkt time =
-    (* This algorithm does need to read and write to state. *)
     let flow = find_flow pkt in
     let var_last_finish = Printf.sprintf "%s_last_finish" flow in
     (* We will use this variable to read/write to state.
@@ -79,18 +78,18 @@ module RRobin_Ternary = struct
        over the course of the simulation.
     *)
     let start =
-      if State.isdefined s var_last_finish then
-        max (Time.to_float time) (State.lookup s var_last_finish)
+      if State.isdefined var_last_finish s then
+        max (Time.to_float time) (State.lookup var_last_finish s)
       else Time.to_float time
     in
-    State.rebind s var_last_finish (start +. (100.0 /. 0.33));
+    let s' = State.rebind var_last_finish (start +. (100.0 /. 0.33)) s in
     let rank_for_root = Rank.create start time in
     match flow with
-    | "A" -> ([ (0, rank_for_root); (0, Rank.create 0.0 time) ], s)
-    | "B" -> ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s)
-    | "C" -> ([ (2, rank_for_root); (0, Rank.create 0.0 time) ], s)
+    | "A" -> ([ (0, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "B" -> ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "C" -> ([ (2, rank_for_root); (0, Rank.create 0.0 time) ], s')
     (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
-       The ranks at the root are as computed above.
+       The ranks at the root are as computed just above.
        At the leaves, we let FCFS prevail.
     *)
     | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
@@ -98,6 +97,48 @@ module RRobin_Ternary = struct
   let control : Control.t =
     {
       s = State.create 1;
+      q = Pifotree.create Topo.one_level_ternary;
+      z = scheduling_transaction;
+    }
+
+  let simulate end_time pkts =
+    Control.simulate end_time 0.001 poprate pkts control
+end
+
+module WFQ_Ternary = struct
+  let scheduling_transaction s pkt time =
+    let flow = find_flow pkt in
+    let var_last_finish = Printf.sprintf "%s_last_finish" flow in
+    let var_weight = Printf.sprintf "%s_weight" flow in
+    let start =
+      if State.isdefined var_last_finish s then
+        max (Time.to_float time) (State.lookup var_last_finish s)
+      else Time.to_float time
+    in
+    let weight = State.lookup var_weight s in
+    let s' =
+      State.rebind var_last_finish
+        (start +. (float_of_int (Packet.len pkt) /. weight))
+        s
+    in
+    let rank_for_root = Rank.create start time in
+    match flow with
+    | "A" -> ([ (0, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "B" -> ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "C" -> ([ (2, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
+       The ranks at the root are as computed just above.
+       At the leaves, we let FCFS prevail.
+    *)
+    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+
+  let control : Control.t =
+    {
+      s =
+        State.create 6
+        |> State.rebind "A_weight" 0.1
+        |> State.rebind "B_weight" 0.2
+        |> State.rebind "C_weight" 0.3;
       q = Pifotree.create Topo.one_level_ternary;
       z = scheduling_transaction;
     }

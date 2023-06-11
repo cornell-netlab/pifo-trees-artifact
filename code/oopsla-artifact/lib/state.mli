@@ -1,6 +1,6 @@
 type t
 
 val create : int -> t
-val lookup : t -> string -> float
-val rebind : t -> string -> float -> unit
-val isdefined : t -> string -> bool
+val lookup : string -> t -> float
+val rebind : string -> float -> t -> t
+val isdefined : string -> t -> bool

@@ -54,6 +54,7 @@ let complete_to_meta (p : packet_complete) =
 (* It is occasionally useful to read/write fields in the metadata. *)
 let time t = t.time
 let src t = t.src
+let len t = t.len
 let punch_in t time = { t with pushed = Some time }
 let punch_out t time = { t with popped = Some time }
 
