@@ -6,9 +6,9 @@ let create topo =
 let add_to_state t = State.rebind t.s
 let mod_sched t z = { t with z }
 
-let simulate end_sim sleep pop_tick flow t =
+let simulate end_time sleep pop_tick flow t =
   (* The user gives us:
-     - `end_sim`: when to stop simulating.
+     - `end_time`: when to stop simulating.
      - `sleep`: how long to sleep when there's no work to do.
      - `pop_tick`: a threshold for when next to try a Pop.
      - `flow`: the packet flow to simulate, essentially a list of packets.
@@ -31,7 +31,7 @@ let simulate end_sim sleep pop_tick flow t =
   *)
   let rec helper flow time tsp state tree ans =
     (* `tsp` is "time since pop". The other fields are self-explanatory. *)
-    if time >= end_sim then List.rev ans
+    if time >= end_time then List.rev ans
     else if tsp >= pop_tick then
       (* Let's try to pop. *)
       match Pifotree.pop tree with
