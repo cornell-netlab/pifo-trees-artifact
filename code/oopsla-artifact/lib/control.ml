@@ -29,36 +29,37 @@ let simulate end_sim sleep pop_tick flow t =
      The tree can be popped only if the time since the last pop is greater than `pop_tick`.
      This allows us to play with `pop_tick` and therfore saturate the tree.
   *)
-  let rec helper flow time tsp s q ans =
-    (* `tsp` is "time since pop". `s` is the state. `q` is the tree.
-       The other fields are self-explanatory.
-    *)
+  let rec helper flow time tsp state tree ans =
+    (* `tsp` is "time since pop". The other fields are self-explanatory. *)
     if time >= end_sim then List.rev ans
     else if tsp >= pop_tick then
       (* Let's try to pop. *)
-      match Pifotree.pop q with
+      match Pifotree.pop tree with
       (* No more ripe packets in tree. Recurse with tsp = 0.0. *)
-      | None -> helper flow time 0.0 s q ans
+      | None -> helper flow time 0.0 state tree ans
       (* Made progress by popping. Add to answer and recurse. *)
-      | Some (pkt, q') ->
-          helper flow time 0.0 s q' (Packet.punch_out pkt time :: ans)
+      | Some (pkt, tree') ->
+          helper flow time 0.0 state tree' (Packet.punch_out pkt time :: ans)
     else
       (* If no pop-work is due, try to push. *)
       match Flow.hd_tl flow with
       (* No more packets to push. Sleep and recurse. *)
-      | None -> helper flow (Time.add_float time sleep) (tsp +. sleep) s q ans
+      | None ->
+          helper flow (Time.add_float time sleep) (tsp +. sleep) state tree ans
       (* We have a packet to push. *)
       | Some (pkt, f') ->
           (* But is it ready to be scheduled? *)
           if time >= pkt.time then
             (* Yes. Push it. *)
-            let path, s' = t.z s pkt in
-            let q' = Pifotree.push t.q (Packet.punch_in pkt time) path in
-            helper f' time tsp s' q' ans
+            let path, state' = t.z state pkt in
+            let tree' = Pifotree.push t.q (Packet.punch_in pkt time) path in
+            helper f' time tsp state' tree' ans
           else
             (* Packet wasn't ready to push.
                Sleep and recurse, restoring `flow` to its previous state. *)
-            helper flow (Time.add_float time sleep) (tsp +. sleep) s q ans
+            helper flow
+              (Time.add_float time sleep)
+              (tsp +. sleep) state tree ans
   in
   let time = Flow.first_pkt_time flow in
   Random.init 42;
