@@ -42,7 +42,7 @@ let simulate end_sim sleep pop_tick flow t =
       | Some (pkt, f') ->
           (* But is it ready to be scheduled? *)
           if time >= (Packet.to_meta pkt).time then
-            (* Yes. Try to push it. *)
+            (* Yes. Push it. *)
             let path, s' = t.z s pkt in
             let q' = Pifotree.push t.q pkt path in
             helper f' time tsp s' q' ans
