@@ -1,4 +1,4 @@
-open Util
+let ( let* ) = Option.bind
 
 type t =
   | Leaf of (Packet.t * Rank.t) Pifo.t
@@ -12,7 +12,7 @@ let rec pop t =
   | Internal (qs, p) ->
       let* (i, _), p' = Pifo.pop p in
       let* pkt, q' = pop (List.nth qs i) in
-      Some (pkt, Internal (replace_nth qs i q', p'))
+      Some (pkt, Internal (Util.replace_nth qs i q', p'))
 
 let rec push t pkt path =
   match (t, path) with
@@ -20,7 +20,7 @@ let rec push t pkt path =
   | Internal (qs, p), (i, r) :: pt ->
       let p' = Pifo.push p (i, r) in
       let q' = push (List.nth qs i) pkt pt in
-      Internal (replace_nth qs i q', p')
+      Internal (Util.replace_nth qs i q', p')
   | _ -> failwith "Push: invalid path"
 
 let rec size t =

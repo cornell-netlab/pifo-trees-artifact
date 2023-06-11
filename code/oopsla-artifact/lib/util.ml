@@ -1,4 +1,3 @@
-let ( let* ) = Option.bind
 let replace_nth l n nth' = List.mapi (fun i x -> if i = n then nth' else x) l
 
 let rec find_nth l n =
