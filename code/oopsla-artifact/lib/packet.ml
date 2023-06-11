@@ -29,10 +29,6 @@ let complete_to_meta p =
     pka = [];
   }
 
-let time_float sec usec =
-  Time.of_float
-    (Int32.to_float sec +. float_of_string ("0." ^ Int32.to_string usec))
-
 let create h (ph, pb) =
   (* packet header, packet body *)
   let module H = (val h : HDR) in
@@ -40,7 +36,9 @@ let create h (ph, pb) =
   let header =
     {
       time =
-        time_float (H.get_pcap_packet_ts_sec ph) (H.get_pcap_packet_ts_usec ph);
+        Time.of_floats
+          (H.get_pcap_packet_ts_sec ph)
+          (H.get_pcap_packet_ts_usec ph);
       size_incl = H.get_pcap_packet_incl_len ph;
       size_actu = H.get_pcap_packet_orig_len ph;
     }
