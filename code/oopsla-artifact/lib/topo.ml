@@ -48,3 +48,7 @@ let to_binary t =
 
 let one_level_ternary : t = Node [ Star; Star; Star ]
 let binary_three_leaves : t = Node [ Node [ Star; Star ]; Star ]
+let two_level_ternary : t = Node [ Star; Star; Node [ Star; Star; Star ] ]
+
+let three_level_ternary : t =
+  Node [ Star; Star; Node [ Star; Star; Node [ Star; Star; Star ] ] ]
