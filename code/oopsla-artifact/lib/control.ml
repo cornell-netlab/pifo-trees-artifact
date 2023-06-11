@@ -6,9 +6,9 @@ let create topo =
 let add_to_state t = State.rebind t.s
 let mod_sched t z = { t with z }
 
-let simulate end_time sleep pop_tick flow t =
+let simulate sim_length sleep pop_tick flow t =
   (* The user gives us:
-     - `end_time`: when to stop simulating.
+     - `sim_length`: after how many seconds to stop simulating.
      - `sleep`: how long to sleep when there's no work to do.
      - `pop_tick`: a threshold for when next to try a Pop.
      - `flow`: the packet flow to simulate, essentially a list of packets.
@@ -29,6 +29,9 @@ let simulate end_time sleep pop_tick flow t =
      The tree can be popped only if the time since the last pop is greater than `pop_tick`.
      This allows us to play with `pop_tick` and therfore saturate the tree.
   *)
+  let start_time = Packet.time (List.hd flow) in
+  let end_time = Time.add_float start_time sim_length in
+
   let rec helper flow time tsp state tree ans =
     (* `tsp` is "time since pop". The other fields are self-explanatory. *)
     if time >= end_time then List.rev ans
@@ -61,9 +64,7 @@ let simulate end_time sleep pop_tick flow t =
               (Time.add_float time sleep)
               (tsp +. sleep) state tree ans
   in
-  let time = Packet.time (List.hd flow) in
-  Random.init 42;
-  helper flow time 0.0 t.s t.q []
+  helper flow start_time 0.0 t.s t.q []
 (* It proves useful to extract and pass copies of the state (t.s) and tree (t.q).
    The scheduling transaction (t.z) does not tend to change during a simulation,
    so we don't pass it in.

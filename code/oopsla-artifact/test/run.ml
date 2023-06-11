@@ -1,25 +1,27 @@
 open Pifotrees_lib
 open Alg
 
-let f1 = Flow.create "../pcaps/two_then_three.pcap"
-let f2 = Flow.create "../pcaps/two_then_three.pcap"
-let f3 = Flow.create "../pcaps/five_flows.pcap"
-let f4 = Flow.create "../pcaps/seven_flows.pcap"
-let fcfs_flow = Flow.create "../pcaps/fcfs_generated.pcap"
-let rr_flow = Flow.create "../pcaps/rr_generated.pcap"
-let strict_flow = Flow.create "../pcaps/strict_generated.pcap"
-let wfq_flow = Flow.create "../pcaps/wfq_generated.pcap"
+let f1 = Packet.pkts_from_file "../pcaps/two_then_three.pcap"
+let f2 = Packet.pkts_from_file "../pcaps/two_then_three.pcap"
+let f3 = Packet.pkts_from_file "../pcaps/five_flows.pcap"
+let f4 = Packet.pkts_from_file "../pcaps/seven_flows.pcap"
+let fcfs_flow = Packet.pkts_from_file "../pcaps/fcfs_generated.pcap"
+let rr_flow = Packet.pkts_from_file "../pcaps/rr_generated.pcap"
+let strict_flow = Packet.pkts_from_file "../pcaps/strict_generated.pcap"
+let wfq_flow = Packet.pkts_from_file "../pcaps/wfq_generated.pcap"
 
 let run simulate_fn flow name =
-  (* time at which to cut off simulation *)
-  let end_sim = Time.add_float (Flow.first_pkt_time flow) 100.0 in
-  let c = simulate_fn end_sim flow in
+  (* time after which to cut off simulation *)
+  let sim_length = 100.0 in
+  let c = simulate_fn sim_length flow in
   (* how do we want to render pushed-but-unpopped items?
    * false: blank lines
    * true: colored lines that go until end_sim
    *)
   let show_unpopped = false in
-  let overdue = if show_unpopped then end_sim else Time.of_float 0.0 in
+  let overdue =
+    if show_unpopped then Time.of_float sim_length else Time.of_float 0.0
+  in
   Packet.write_to_csv c overdue (Printf.sprintf "../../output%s.csv" name)
 
 (* for the the basic algorithms, we will run all flows through all schedulers *)
