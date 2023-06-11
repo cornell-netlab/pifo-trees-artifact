@@ -8,3 +8,4 @@ val size : t -> int
 val well_formed : t -> bool
 val snapshot : t -> Packet.t list list
 val flush : t -> Packet.t list
+val create : Topo.t -> t
