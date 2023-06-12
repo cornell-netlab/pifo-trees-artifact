@@ -1,41 +1,12 @@
 type t = Star | Node of t list
-type decorated_t = Star_dec of int | Node_dec of int * decorated_t list
 
 (* It is sometimes convenient to temporarily index the topology with int indices. *)
 type addr_t = int list
 
-let rec height dec_t =
-  match dec_t with
-  | Star_dec _ -> 1
-  | Node_dec (_, trees) -> 1 + List.fold_left max 0 (List.map height trees)
-
-let decorate t =
-  (* Adds integer indices to the Nodes and Stars of the tree. *)
-  let new_id =
-    (* Generates integer indices. *)
-    let n = ref 0 in
-    fun () ->
-      let id = !n in
-      incr n;
-      id
-  in
-  let rec helper t =
-    match t with
-    | Star -> Star_dec (new_id ())
-    | Node trees ->
-        let trees' = List.map (fun tree -> helper tree) trees in
-        Node_dec (new_id (), trees')
-  in
-  helper t
-
-let undecorate t_dec =
-  (* Removes integer indices from the Nodes and Stars of the tree. *)
-  let rec helper t_dec =
-    match t_dec with
-    | Star_dec _ -> Star
-    | Node_dec (_, trees) -> Node (List.map (fun tree -> helper tree) trees)
-  in
-  helper t_dec
+let rec height t =
+  match t with
+  | Star -> 1
+  | Node trees -> 1 + List.fold_left max 0 (List.map height trees)
 
 let print_tree t =
   (* Just for fun, to see trees change as they are embedded. *)
@@ -47,18 +18,6 @@ let print_tree t =
         ignore (List.map (print_tree_helper (space ^ "\t")) trees)
   in
   print_tree_helper "" t;
-  print_newline ()
-
-let _print_decorated_tree dec_t =
-  (* Just for fun, to see trees change as they are embedded. *)
-  let rec print_tree_helper space dec_t =
-    match dec_t with
-    | Star_dec i -> Printf.printf "%s *%d\n" space i
-    | Node_dec (i, trees) ->
-        Printf.printf "%s *%d--------\n" space i;
-        ignore (List.map (print_tree_helper (space ^ "\t")) trees)
-  in
-  print_tree_helper "" dec_t;
   print_newline ()
 
 let sprint_addr (addr : addr_t) =
@@ -76,7 +35,7 @@ let rec treeify pq =
           (* Now found a _second_ tree with the same height.
              Make them siblings, push the new Node into the PQ, and proceed.
           *)
-          let new_tree = Node_dec (8888, [ first; second ]) in
+          let new_tree = Node [ first; second ] in
           let pq''' = Pifo.push pq'' (new_tree, ht + 1) in
           treeify pq'''
       | None ->
@@ -91,8 +50,8 @@ let rec treeify pq =
 let build_binary t =
   let rec helper t =
     match t with
-    | Star_dec _ -> t
-    | Node_dec (index, trees) -> (
+    | Star -> t
+    | Node trees -> (
         let trees' =
           List.map
             (fun t ->
@@ -102,51 +61,15 @@ let build_binary t =
         in
         let pq = Pifo.of_list trees' (fun (_, a) (_, b) -> a - b) in
         match treeify pq with
-        | Star_dec _ -> failwith "Impossible."
-        | Node_dec (_, trees) -> Node_dec (index, trees))
+        | Star -> failwith "Impossible."
+        | Node trees -> Node trees)
   in
   helper t
 
-let get_addr_of_index index t_dec : addr_t =
-  (* Searches the tree looking for any Node or Star having index `index`.
-     Returns the address of that Node or Star, if one exists. *)
-  let rec helper t_dec =
-    match t_dec with
-    | Star_dec id -> if id = index then Some [] else None
-    | Node_dec (id, trees) -> (
-        if id = index then Some []
-        else if trees = [] then None
-        else
-          let tagged_trees = List.mapi (fun i x -> (i, helper x)) trees in
-          match List.filter (fun (_, b) -> Option.is_some b) tagged_trees with
-          | [] -> None
-          | [ (i, Some ans) ] -> Some (i :: ans)
-          | _ -> None)
-  in
-  Option.get (helper t_dec)
-
-let create_map t1 t2 =
-  let rec helper working_tree map =
-    (* Creates a mapping from the addresses of the first tree to the
-       addresses of the second tree.
-       An address is an int list, where each int is the index of a child in the tree.
-    *)
-    match working_tree with
-    | Star_dec i ->
-        Hashtbl.add map (get_addr_of_index i t1) (get_addr_of_index i t2)
-    | Node_dec (i, trees) ->
-        Hashtbl.add map (get_addr_of_index i t1) (get_addr_of_index i t2);
-        ignore (List.map (fun tree -> helper tree map) trees)
-  in
-  let map = Hashtbl.create 100 in
-  helper t1 map;
-  map
-
 let build_and_embed_binary t =
-  let decorated_self = decorate t in
-  let decorated_bin = build_binary decorated_self in
-  let mapping = create_map decorated_self decorated_bin in
-  (mapping, undecorate decorated_bin)
+  let bin_tree = build_binary t in
+  let mapping = Hashtbl.create 10 in
+  (mapping, bin_tree)
 
 let one_level_ternary = Node [ Star; Star; Star ]
 let two_level_binary = Node [ Node [ Star; Star ]; Star ]
