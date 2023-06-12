@@ -1,8 +1,6 @@
-open Hashtbl
-
 type t = (string, float) Hashtbl.t
 
-let create size = create size
+let create size = Hashtbl.create size
 
 let lookup v t =
   try Hashtbl.find t v
