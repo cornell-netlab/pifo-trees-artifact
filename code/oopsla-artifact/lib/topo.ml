@@ -1,7 +1,6 @@
 type t = Star | Node of t list
-
-(* It is sometimes convenient to temporarily index the topology with int indices. *)
 type addr_t = int list
+type mapping_t = addr_t -> addr_t Option.t (* A partial map from addr to addr *)
 
 let rec height t =
   match t with
@@ -20,56 +19,92 @@ let print_tree t =
   print_tree_helper "" t;
   print_newline ()
 
-let sprint_addr (addr : addr_t) =
-  Printf.sprintf "[ %s ]" (String.concat "; " (List.map string_of_int addr))
+(*let sprint_int_list l =
+   let rec helper l =
+     match l with
+     | [] -> ""
+     | [ x ] -> string_of_int x
+     | x :: xs -> string_of_int x ^ ", " ^ helper xs
+   in
+   "[" ^ helper l ^ "]"
 
-let rec treeify pq =
+  let print_mapping ((partial_fun, defined_on) : mapping_t) =
+    let rec helper targets =
+      match targets with
+      | [] -> ()
+      | target :: rest ->
+          Printf.printf "%s -> %s\n" (sprint_int_list target)
+            (match partial_fun target with
+            | None ->
+                failwith "Mapping is not complete when it was expected to be!"
+            | Some x -> sprint_int_list x);
+          helper rest
+    in
+    helper defined_on *)
+
+let rec treeify (pq : (t * mapping_t * int) Pifo.t) : t * mapping_t =
   match Pifo.length pq with
   | 0 -> failwith "Cannot treeify empty PQ."
-  | 1 -> fst (Pifo.top_exn pq)
-  | _ -> (
-      let (first, ht), pq' = Pifo.pop_exn pq in
-      (* Found one tree with some height `ht`. *)
-      match Pifo.pop_if pq' (fun (_, ht') -> ht = ht') with
-      | Some ((second, _), pq'') ->
-          (* Now found a _second_ tree with the same height.
-             Make them siblings, push the new Node into the PQ, and proceed.
-          *)
-          let new_tree = Node [ first; second ] in
-          let pq''' = Pifo.push pq'' (new_tree, ht + 1) in
-          treeify pq'''
-      | None ->
-          (* Found no more elements of this heigh `ht`!
-             Reinsert the first tree that we extracted,
-             but with a falsely-increased height.
-             Then proceed.
-          *)
-          let pq'' = Pifo.push pq' (first, ht + 1) in
-          treeify pq'')
+  | 1 ->
+      (* Success: there was just one tree of height _height. *)
+      let t, mapping, _height = Pifo.top_exn pq in
+      (t, mapping)
+  | _ ->
+      (* Grab the shortest two trees. *)
+      let (a, map_a, height_a), pq' = Pifo.pop_exn pq in
+      let (b, map_b, height_b), pq'' = Pifo.pop_exn pq' in
+      (* Do they have the same height? *)
+      if height_a = height_b then
+        (* Yes: make a new node, plus a new mapping. *)
+        let new_node = Node [ a; b ] in
+        let new_map addr =
+          match addr with
+          | [] -> Some []
+          | steps -> (
+              match (map_a steps, map_b steps) with
+              | None, None -> None
+              | Some x, None -> Some (0 :: x)
+              | None, Some x -> Some (1 :: x)
+              | Some _, Some _ -> failwith "Impossible.")
+        in
+        (* Add the new node to the PQ. *)
+        (* The height of this tree is clearly one more than its children. *)
+        let pq''' = Pifo.push pq'' (new_node, new_map, height_a + 1) in
+        treeify pq'''
+      else
+        (* No: reinsert the two trees, the first with its height artificially increased by one, and try again. *)
+        let pq''' =
+          Pifo.push
+            (Pifo.push pq'' (a, map_a, height_a + 1))
+            (b, map_b, height_b)
+        in
+        treeify pq'''
 
 let build_binary t =
-  let rec helper t =
+  let rec helper t : t * mapping_t =
     match t with
-    | Star -> t
-    | Node trees -> (
-        let trees' =
-          List.map
-            (fun t ->
-              let t' = helper t in
-              (t', height t'))
-            trees
+    | Star -> (t, fun _ -> None)
+    | Node ts ->
+        let (ts' : (t * mapping_t * int) list) =
+          List.mapi
+            (fun i t ->
+              (* Get embeddings and mappings for all of this node's children. *)
+              let t', mapping = helper t in
+              (* For each child, add the partial map i -> [] to its mapping function. *)
+              let mapping_fn addr =
+                if addr = [ i ] then Some [] else mapping addr
+              in
+              (* AM: should this be None? *)
+              (* Get the height of this tree. *)
+              let height = height t' in
+              (* Put it all together. *)
+              (t', mapping_fn, height))
+            ts
         in
-        let pq = Pifo.of_list trees' (fun (_, a) (_, b) -> a - b) in
-        match treeify pq with
-        | Star -> failwith "Impossible."
-        | Node trees -> Node trees)
+        let pq = Pifo.of_list ts' (fun (_, _, a) (_, _, b) -> a - b) in
+        treeify pq
   in
   helper t
-
-let build_and_embed_binary t =
-  let bin_tree = build_binary t in
-  let mapping = Hashtbl.create 10 in
-  (mapping, bin_tree)
 
 let one_level_ternary = Node [ Star; Star; Star ]
 let two_level_binary = Node [ Node [ Star; Star ]; Star ]

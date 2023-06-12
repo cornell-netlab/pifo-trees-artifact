@@ -24,16 +24,13 @@ let run simulate_fn flow name =
   Packet.write_to_csv c overdue (Printf.sprintf "../../output%s.csv" name)
 
 let embed_verbose tree =
-  let embedding, compiled_tree = Topo.build_and_embed_binary tree in
+  let compiled_tree, _mapping = Topo.build_binary tree in
   Printf.printf "\n\n";
   Topo.print_tree tree;
   Printf.printf "\n was compiled into \n\n";
   Topo.print_tree compiled_tree;
-  Printf.printf "\n with the mapping \n\n";
-  Hashtbl.iter
-    (fun k v ->
-      Printf.printf "%s -> %s\n" (Topo.sprint_addr k) (Topo.sprint_addr v))
-    embedding
+  Printf.printf "\n with the mapping \n\n"
+(* Topo.print_mapping mapping *)
 
 let fig3 () =
   (* A little evidence for the embedding shown in Figure 3. *)
