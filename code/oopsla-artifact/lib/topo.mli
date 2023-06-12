@@ -7,4 +7,4 @@ val two_level_binary : t
 val two_level_ternary : t
 val three_level_ternary : t
 val irregular : t
-val irregular_binary : t
+val complex_binary : t

@@ -26,7 +26,7 @@ let run simulate_fn flow name =
 let embedding =
   (* Embedding: Figure 3 *)
   assert (Topo.to_binary Topo.one_level_ternary = Topo.two_level_binary);
-  assert (Topo.to_binary Topo.irregular = Topo.irregular_binary)
+  assert (Topo.to_binary Topo.irregular = Topo.complex_binary)
 
 let _ =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
