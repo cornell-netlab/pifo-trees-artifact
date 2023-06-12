@@ -23,12 +23,24 @@ let run simulate_fn flow name =
   in
   Packet.write_to_csv c overdue (Printf.sprintf "../../output%s.csv" name)
 
-let embedding =
-  (* Embedding: Figure 3 *)
-  assert (Topo.to_binary Topo.one_level_ternary = Topo.two_level_binary);
-  assert (Topo.to_binary Topo.irregular = Topo.complex_binary)
+let embed_verbose tree =
+  let embedding, compiled_tree = Topo.build_and_embed_binary tree in
+  Printf.printf "\n\n";
+  Topo.print_tree tree;
+  Printf.printf "\n was compiled into \n\n";
+  Topo.print_tree compiled_tree;
+  Printf.printf "\n with the mapping \n\n";
+  Hashtbl.iter
+    (fun k v ->
+      Printf.printf "%s -> %s\n" (Topo.sprint_addr k) (Topo.sprint_addr v))
+    embedding
 
-let _ =
+let fig3 () =
+  (* A little evidence for the embedding shown in Figure 3. *)
+  embed_verbose Topo.one_level_ternary;
+  embed_verbose Topo.irregular
+
+let simulate () =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
   run Strict_Ternary.simulate strict_flow "strict";
   run RRobin_Ternary.simulate rr_flow "rr";
@@ -36,3 +48,5 @@ let _ =
   run HPFQ_Binary.simulate two_then_three "hpfq";
   run TwoPol_Ternary.simulate five_flows "twopol";
   run ThreePol_Ternary.simulate seven_flows "threepol"
+
+let _ = fig3 ()
