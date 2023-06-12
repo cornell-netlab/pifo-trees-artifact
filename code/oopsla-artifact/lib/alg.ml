@@ -17,7 +17,8 @@ let find_flow p =
   | n -> failwith Printf.(sprintf "Unknown source address: %d." n)
 
 module FCFS_Ternary = struct
-  let scheduling_transaction (s : State.t) pkt time =
+  let scheduling_transaction (s : State.t) pkt =
+    let time = Packet.time pkt in
     match find_flow pkt with
     | "A" -> ([ (0, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
     | "B" -> ([ (1, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
@@ -48,7 +49,8 @@ module FCFS_Ternary = struct
 end
 
 module Strict_Ternary = struct
-  let scheduling_transaction (s : State.t) pkt time =
+  let scheduling_transaction (s : State.t) pkt =
+    let time = Packet.time pkt in
     let int_for_root, rank_for_root =
       (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
          The ranks at the root are set up to prefer C to B, and B to A.
@@ -73,7 +75,8 @@ module Strict_Ternary = struct
 end
 
 module RRobin_Ternary = struct
-  let scheduling_transaction s pkt time =
+  let scheduling_transaction s pkt =
+    let time = Packet.time pkt in
     let flow = find_flow pkt in
     let var_last_finish = Printf.sprintf "%s_last_finish" flow in
     (* We will use this variable to read/write to state. *)
@@ -120,7 +123,8 @@ let wfq_helper s weight var_last_finish pkt_len time : Rank.t * State.t =
   (Rank.create rank time, s')
 
 module WFQ_Ternary = struct
-  let scheduling_transaction s pkt time =
+  let scheduling_transaction s pkt =
+    let time = Packet.time pkt in
     let flow = find_flow pkt in
     let var_last_finish = Printf.sprintf "%s_last_finish" flow in
     let var_weight = Printf.sprintf "%s_weight" flow in
@@ -154,7 +158,8 @@ module WFQ_Ternary = struct
 end
 
 module HPFQ_Binary = struct
-  let scheduling_transaction s pkt time =
+  let scheduling_transaction s pkt =
+    let time = Packet.time pkt in
     let flow = find_flow pkt in
     (* This is either A, B, or C.
        When computing ranks for the root, we arbitrate between AB or C.
@@ -221,7 +226,8 @@ module HPFQ_Binary = struct
 end
 
 module TwoPol_Ternary = struct
-  let scheduling_transaction s pkt time =
+  let scheduling_transaction s pkt =
+    let time = Packet.time pkt in
     let flow = find_flow pkt in
     (* This is either A, B, C, D, or E.
        When computing ranks for the root, we arbitrate between A, B, or CDE.
@@ -283,7 +289,8 @@ module TwoPol_Ternary = struct
 end
 
 module ThreePol_Ternary = struct
-  let scheduling_transaction s pkt time =
+  let scheduling_transaction s pkt =
+    let time = Packet.time pkt in
     let flow = find_flow pkt in
     (* This is either A, B, C, D, E, F, or G.
        When computing ranks for the root, we arbitrate between A, B, or CDEFG.

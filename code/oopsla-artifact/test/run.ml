@@ -49,4 +49,4 @@ let simulate () =
   run TwoPol_Ternary.simulate five_flows "twopol";
   run ThreePol_Ternary.simulate seven_flows "threepol"
 
-let _ = fig3 ()
+let _ = simulate ()

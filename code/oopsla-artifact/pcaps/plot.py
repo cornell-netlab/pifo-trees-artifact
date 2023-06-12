@@ -84,7 +84,8 @@ def make_plot(df, subplt, name):
 
 
 def plot():
-    for i in ["threepol"]:
+    for i in ["fcfs", "strict", "rr", "wfq", "hpfq", "twopol", "threepol"]:
+
         #   "fcfs", "strict", "rr", "wfq", "hpfq"]:
         #   "fcfs_bin", "strict_bin", "rr_bin", "fair_bin", "mrg_bin"]:
         # for j in range(1, 3):
