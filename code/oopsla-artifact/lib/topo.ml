@@ -67,6 +67,6 @@ let three_level_ternary : t =
 
 let irregular : t = Node [ Star; Star; Star; Node [ Star; Star; Star ] ]
 
-let irregular_binary : t =
+let complex_binary : t =
   Node
     [ Node [ Node [ Star; Star ]; Star ]; Node [ Node [ Star; Star ]; Star ] ]
