@@ -33,13 +33,14 @@ let print_map (map : map_t) defined_on =
     match targets with
     | [] -> ()
     | target :: rest ->
-        Printf.printf "%s -> %s\n" (sprint_int_list target)
+        Printf.printf "%s -> %s // " (sprint_int_list target)
           (match map target with
           | None -> Printf.sprintf "_"
           | Some x -> sprint_int_list x);
         helper rest
   in
-  helper defined_on
+  helper defined_on;
+  print_newline ()
 
 let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
   match Pifo.length pq with
@@ -64,12 +65,6 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
             match (map_a addr, map_b addr) with
             | None, None ->
                 (* If neither of my children can get to it, neither can I. *)
-                Printf.printf "Treeifying the trees:\n";
-                print_tree a;
-                Printf.printf "and\n";
-                print_tree b;
-                Printf.printf "but neither had maps defined on address %s.\n%!"
-                  (sprint_int_list addr);
                 None
             | Some x, None ->
                 (* If my left child knows how to get to it, I'll go via left. *)
@@ -81,10 +76,8 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
                 (* Impossible? *)
                 Printf.printf "Treeifying the trees:\n";
                 print_tree a;
-                print_map map_a [ [ 0 ]; [ 1 ] ];
                 Printf.printf "and\n";
                 print_tree b;
-                print_map map_b [ [ 0 ]; [ 1 ] ];
                 Printf.printf
                   "but both the trees I extracted had maps defined on address \
                    %s. They are %s and %s.\n\
@@ -119,12 +112,19 @@ let rec build_binary t =
           (fun i t ->
             (* Get embeddings and maps for the subtrees. *)
             let t', map = build_binary t in
+            print_tree t';
+            Printf.printf "map for child %d:\n" i;
+            print_map map
+              [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ]; [ 1; 0 ]; [ 1; 1 ] ];
             (* For each child, add the binding `i -> []`
                to its map if it does not already have it. *)
             (* let map' addr = if map [ i ] = None then Some [] else map addr in *)
             let map' addr =
               if addr = [ i ] && map [ i ] = None then Some [] else map addr
             in
+            Printf.printf "map' for child %d:\n" i;
+            print_map map'
+              [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ]; [ 1; 0 ]; [ 1; 1 ] ];
             (* AM: I think there is a bug here. *)
             (* Get the height of this tree. *)
             let height = height t' in
