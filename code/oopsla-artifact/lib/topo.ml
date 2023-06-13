@@ -1,7 +1,7 @@
 type t = Star | Node of t list
 type addr_t = int list
-type hint_t = int -> addr_t Option.t
-type map_t = addr_t -> addr_t Option.t (* A partial map from addr to addr *)
+type hint_t = int -> addr_t Option.t (* A partial map from int to addr. *)
+type map_t = addr_t -> addr_t Option.t (* A partial map from addr to addr. *)
 
 let rec height t =
   match t with
@@ -20,24 +20,26 @@ let print_tree t =
   print_tree_helper "" t;
   print_newline ()
 
-let sprint_int_list l =
-  let rec helper l =
-    match l with
-    | [] -> ""
-    | [ x ] -> string_of_int x
-    | x :: xs -> string_of_int x ^ ", " ^ helper xs
-  in
-  "[" ^ helper l ^ "]"
-
 let print_map (map : map_t) defined_on =
-  (* Takes a list of addresses that you think the map should be defined on. *)
+  (* Pretty-prints the embedding map.
+     Takes a list of addresses that you think the map should be defined on.
+  *)
+  let sprint_int_list l =
+    let rec helper l =
+      match l with
+      | [] -> ""
+      | [ x ] -> string_of_int x
+      | x :: xs -> string_of_int x ^ ", " ^ helper xs
+    in
+    "[" ^ helper l ^ "]"
+  in
   let rec helper targets =
     match targets with
     | [] -> ()
     | target :: rest ->
         Printf.printf "%s -> %s // " (sprint_int_list target)
           (match map target with
-          | None -> Printf.sprintf "_"
+          | None -> Printf.sprintf "_" (* Not defined. *)
           | Some x -> sprint_int_list x);
         helper rest
   in
@@ -48,10 +50,10 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
   match Pifo.length pq with
   | 0 -> failwith "Cannot treeify empty PQ."
   | 1 ->
-      (* Success: there was just one tree of height _height.
-         Discard the height and return the tree and its map.
+      (* Success: there was just one tree left.
+         Discard the hint and the height and return the tree and its map.
       *)
-      let t, _hint, map, _height = Pifo.top_exn pq in
+      let t, _, map, _ = Pifo.top_exn pq in
       (t, map)
   | _ ->
       (* Extract the shortest two trees. *)
@@ -59,40 +61,31 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
       let (b, hint_b, map_b, height_b), pq'' = Pifo.pop_exn pq' in
       (* Do they have the same height? *)
       if height_a = height_b then
-        (* Yes! Make a new node, plus a new map. *)
+        (* Yes! Make a new node, a new embedding map, and new hint map. *)
         let node = Node [ a; b ] in
         let map addr =
           match addr with
           | [] -> Some []
           | n :: rest -> (
-              (* If we are querying a single step, we just need to step to the root
-                 of one of our children.
-                 If we are querying a longer address, we need to step to the
-                 root of one of our children, then step to the root of the
-                 subtree rooted at the next address in the list.
+              (* The step `n` will determine which of our children we'll rely on.
+                 The `rest` will be processed by that child's map.
               *)
               match (hint_a n, hint_b n) with
-              | None, None ->
-                  (* If neither of my children can get to it, neither can I. *)
-                  Printf.printf "\nHmm, I am the union of the trees:\n";
-                  print_tree a;
-                  Printf.printf "and\n";
-                  print_tree b;
-                  Printf.printf
-                    "but neither has a hint defined for the address [%d].\n" n;
-                  None
-              | Some x, None ->
-                  (* If my left child knows how to get to it, I'll go via left. *)
-                  Some ((0 :: x) @ Option.get (map_a rest))
-              | None, Some x ->
-                  (* If my right child knows how to get to it, I'll go via right. *)
-                  Some ((1 :: x) @ Option.get (map_b rest))
+              (* If neither of my children can get to it, neither can I. *)
+              | None, None -> None
+              (* If my left child knows how to get to it, I'll go via left. *)
+              | Some x, None -> Some ((0 :: x) @ Option.get (map_a rest))
+              (* If my right child knows how to get to it, I'll go via right. *)
+              | None, Some x -> Some ((1 :: x) @ Option.get (map_b rest))
+              (* Clashes like this should be impossible. *)
               | Some _, Some _ -> failwith "Unification error.")
         in
-        (* Add the new node to the PQ. *)
+        (* Add the new node to the priority queue. *)
         let hint n =
-          (* The new hint for the node is the union of the children's hints. *)
-          (* TODO AM: just becomes the same as `map`? *)
+          (* The new hint for the node is the union of the children's hints,
+             but, since we are growing taller by one level, we need to arbitrate
+             _between_ those two children using `0` or `1` as a prefix.
+          *)
           match (hint_a n, hint_b n) with
           | None, None -> None
           | Some x, None -> Some (0 :: x)
@@ -100,14 +93,14 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
           | Some _, Some _ -> failwith "Unification error."
         in
         (* The height of this tree is clearly one more than its children. *)
-        let pq''' =
-          Pifo.push pq'' (node, hint, map, height_a + 1)
-          (* AM: todo: cleverer hint map for newly-formed trees. *)
-        in
+        let height = height_a + 1 in
+        (* Add the new node to the priority queue. *)
+        let pq''' = Pifo.push pq'' (node, hint, map, height) in
+        (* Recurse. *)
         treeify pq'''
       else
-        (* No, different heights.
-           Reinsert the two trees, the first with its height artificially increased by one, and try again. *)
+        (* No, the two shortest trees had different heights.
+           Reinsert the two trees, the first with its height artificially increased by one, and recurse. *)
         let pq''' =
           Pifo.push
             (Pifo.push pq'' (a, hint_a, map_a, height_a + 1))
@@ -130,23 +123,19 @@ let rec build_binary t =
             (* For each child, creat a hints map that just has
                the binding `i -> Some []`. *)
             let hint addr = if addr = i then Some [] else None in
-            (* AM: Here I am being careful not to clobber.
-               However, this does mean that we will not tag a node with an existing map for `i`.
-               Bug?
-            *)
             (* Get the height of this tree. *)
             let height = height t' in
             (* Put it all together. *)
             (t', hint, map, height))
           ts
       in
-
       (* A PIFO of these decorated subtrees, prioritized by height.
          Shorter is higher-priority.
       *)
       let pq = Pifo.of_list ts' (fun (_, _, _, a) (_, _, _, b) -> a - b) in
       treeify pq
 
+(* A few topologies to play with. *)
 let one_level_ternary = Node [ Star; Star; Star ]
 let one_level_binary = Node [ Star; Star ]
 let two_level_binary = Node [ Node [ Star; Star ]; Node [ Star; Star ] ]
