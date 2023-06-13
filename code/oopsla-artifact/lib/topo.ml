@@ -75,17 +75,17 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
                   Some (1 :: x)
               | Some x, Some y ->
                   (* Impossible? *)
-                  Printf.printf "Error: I was unifying the trees:\n";
+                  Printf.printf "\nError: I was unifying the trees:\n";
                   print_tree a;
                   Printf.printf "and\n";
                   print_tree b;
                   Printf.printf
-                    "but they both had maps defined for address %s. They are \
-                     %s and %s.\n\
+                    "but they both had maps defined for the same address. They \
+                     mapped the address %s to %s and %s respectively.\n\
                      %!"
                     (sprint_int_list addr) (sprint_int_list x)
                     (sprint_int_list y);
-                  None)
+                  failwith "Unification error.")
           (* failwith *)
           (* "Impossible: both children have maps defined on the same \ *)
              (* address." *)
@@ -133,11 +133,7 @@ let rec build_binary t =
          Shorter is higher-priority.
       *)
       let pq = Pifo.of_list ts' (fun (_, _, a) (_, _, b) -> a - b) in
-      let tree, map = treeify pq in
-      Printf.printf "tree, map after this run through build_binary:\n";
-      print_tree tree;
-      print_map map [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ]; [ 1; 0 ]; [ 1; 1 ] ];
-      (tree, map)
+      treeify pq
 
 let one_level_ternary = Node [ Star; Star; Star ]
 let one_level_binary = Node [ Star; Star ]
