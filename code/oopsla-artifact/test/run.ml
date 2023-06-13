@@ -38,15 +38,16 @@ let fig3 () =
      (can be empty) of which address queries you want to run on the
      resulting tree.
   *)
-  (* working: *)
+  (* Fig 3a *)
   embed_verbose Topo.one_level_ternary [ []; [ 0 ]; [ 1 ]; [ 2 ] ];
+  (* Fig 3b *)
+  embed_verbose Topo.irregular
+    [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 3; 0 ]; [ 3; 1 ]; [ 3; 2 ] ];
+  (* A few more, just for fun. *)
   embed_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
   embed_verbose Topo.four_wide [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ] ];
-  (* not working: when the source is not flat. *)
   embed_verbose Topo.two_level_binary
     [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ]; [ 1; 0 ]; [ 1; 1 ] ]
-(* embed_verbose Topo.irregular *)
-(* [ [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 0; 0 ]; [ 3; 0 ] ] *)
 
 let simulate () =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";

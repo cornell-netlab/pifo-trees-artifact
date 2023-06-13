@@ -64,8 +64,13 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
         let map addr =
           match addr with
           | [] -> Some []
-          | [ n ] -> (
-              (* If we are querying a single step, we just need to step to the root of one of our children. *)
+          | n :: rest -> (
+              (* If we are querying a single step, we just need to step to the root
+                 of one of our children.
+                 If we are querying a longer address, we need to step to the
+                 root of one of our children, then step to the root of the
+                 subtree rooted at the next address in the list.
+              *)
               match (hint_a n, hint_b n) with
               | None, None ->
                   (* If neither of my children can get to it, neither can I. *)
@@ -78,16 +83,11 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
                   None
               | Some x, None ->
                   (* If my left child knows how to get to it, I'll go via left. *)
-                  Some (0 :: x)
+                  Some ((0 :: x) @ Option.get (map_a rest))
               | None, Some x ->
                   (* If my right child knows how to get to it, I'll go via right. *)
-                  Some (1 :: x)
+                  Some ((1 :: x) @ Option.get (map_b rest))
               | Some _, Some _ -> failwith "Unification error.")
-          | _n :: _rest ->
-              (* If we are querying a longer address, we need to step to the root of one of our children,
-                 then step to the root of the subtree rooted at the next address in the list.
-              *)
-              None
         in
         (* Add the new node to the PQ. *)
         let hint n =
