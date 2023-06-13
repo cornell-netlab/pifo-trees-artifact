@@ -25,7 +25,7 @@ let run simulate_fn flow name =
 
 let embed_verbose tree addr_list =
   let compiled_tree, map = Topo.build_binary tree in
-  Printf.printf "\n\n";
+  Printf.printf "\n\nAll told,\n";
   Topo.print_tree tree;
   Printf.printf "\nwas compiled into \n\n";
   Topo.print_tree compiled_tree;

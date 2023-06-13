@@ -57,42 +57,46 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
       let (b, map_b, height_b), pq'' = Pifo.pop_exn pq' in
       (* Do they have the same height? *)
       if height_a = height_b then
-        (* Yes: make a new node, plus a new map. *)
+        (* Yes! Make a new node, plus a new map. *)
         let node' = Node [ a; b ] in
         let map' addr =
-          if addr = [] then Some []
-          else
-            match (map_a addr, map_b addr) with
-            | None, None ->
-                (* If neither of my children can get to it, neither can I. *)
-                None
-            | Some x, None ->
-                (* If my left child knows how to get to it, I'll go via left. *)
-                Some (0 :: x)
-            | None, Some x ->
-                (* If my right child knows how to get to it, I'll go via right. *)
-                Some (1 :: x)
-            | Some x, Some y ->
-                (* Impossible? *)
-                Printf.printf "Treeifying the trees:\n";
-                print_tree a;
-                Printf.printf "and\n";
-                print_tree b;
-                Printf.printf
-                  "but both the trees I extracted had maps defined on address \
-                   %s. They are %s and %s.\n\
-                   %!"
-                  (sprint_int_list addr) (sprint_int_list x) (sprint_int_list y);
-                failwith
-                  "Impossible: both children have maps defined on the same \
-                   address."
+          match addr with
+          | [] -> Some []
+          | _ -> (
+              match (map_a addr, map_b addr) with
+              | None, None ->
+                  (* If neither of my children can get to it, neither can I. *)
+                  None
+              | Some x, None ->
+                  (* If my left child knows how to get to it, I'll go via left. *)
+                  Some (0 :: x)
+              | None, Some x ->
+                  (* If my right child knows how to get to it, I'll go via right. *)
+                  Some (1 :: x)
+              | Some x, Some y ->
+                  (* Impossible? *)
+                  Printf.printf "Error: I was unifying the trees:\n";
+                  print_tree a;
+                  Printf.printf "and\n";
+                  print_tree b;
+                  Printf.printf
+                    "but they both had maps defined for address %s. They are \
+                     %s and %s.\n\
+                     %!"
+                    (sprint_int_list addr) (sprint_int_list x)
+                    (sprint_int_list y);
+                  None)
+          (* failwith *)
+          (* "Impossible: both children have maps defined on the same \ *)
+             (* address." *)
         in
         (* Add the new node to the PQ. *)
         (* The height of this tree is clearly one more than its children. *)
         let pq''' = Pifo.push pq'' (node', map', height_a + 1) in
         treeify pq'''
       else
-        (* No: reinsert the two trees, the first with its height artificially increased by one, and try again. *)
+        (* No, different heights.
+           Reinsert the two trees, the first with its height artificially increased by one, and try again. *)
         let pq''' =
           Pifo.push
             (Pifo.push pq'' (a, map_a, height_a + 1))
@@ -103,7 +107,7 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
 let rec build_binary t =
   match t with
   | Star ->
-      (* The embedding of a star is a star, and the map is the identity for []. *)
+      (* The embedding of a Star is a Star, and the map is the identity for []. *)
       (Star, fun addr -> if addr = [] then Some [] else None)
   | Node ts ->
       let (ts' : (t * map_t * int) list) =
@@ -112,19 +116,11 @@ let rec build_binary t =
           (fun i t ->
             (* Get embeddings and maps for the subtrees. *)
             let t', map = build_binary t in
-            print_tree t';
-            Printf.printf "map for child %d:\n" i;
-            print_map map
-              [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ]; [ 1; 0 ]; [ 1; 1 ] ];
             (* For each child, add the binding `i -> []`
                to its map if it does not already have it. *)
-            (* let map' addr = if map [ i ] = None then Some [] else map addr in *)
             let map' addr =
               if addr = [ i ] && map [ i ] = None then Some [] else map addr
             in
-            Printf.printf "map' for child %d:\n" i;
-            print_map map'
-              [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ]; [ 1; 0 ]; [ 1; 1 ] ];
             (* AM: I think there is a bug here. *)
             (* Get the height of this tree. *)
             let height = height t' in
@@ -132,11 +128,16 @@ let rec build_binary t =
             (t', map', height))
           ts
       in
+
       (* A PIFO of these decorated subtrees, prioritized by height.
          Shorter is higher-priority.
       *)
       let pq = Pifo.of_list ts' (fun (_, _, a) (_, _, b) -> a - b) in
-      treeify pq
+      let tree, map = treeify pq in
+      Printf.printf "tree, map after this run through build_binary:\n";
+      print_tree tree;
+      print_map map [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ]; [ 1; 0 ]; [ 1; 1 ] ];
+      (tree, map)
 
 let one_level_ternary = Node [ Star; Star; Star ]
 let one_level_binary = Node [ Star; Star ]
