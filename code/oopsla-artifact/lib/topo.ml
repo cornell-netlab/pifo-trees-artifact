@@ -152,3 +152,5 @@ let irregular = Node [ Star; Star; Star; Node [ Star; Star; Star ] ]
 let complex_binary =
   Node
     [ Node [ Node [ Star; Star ]; Star ]; Node [ Node [ Star; Star ]; Star ] ]
+
+let eight_wide = Node [ Star; Star; Star; Star; Star; Star; Star; Star ]
