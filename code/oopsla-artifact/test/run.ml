@@ -23,22 +23,30 @@ let run simulate_fn flow name =
   in
   Packet.write_to_csv c overdue (Printf.sprintf "../../output%s.csv" name)
 
-let embed_verbose tree =
-  let embedding, compiled_tree = Topo.build_and_embed_binary tree in
-  Printf.printf "\n\n";
+let embed_verbose tree addr_list =
+  let compiled_tree, map = Topo.build_binary tree in
+  Printf.printf "\n\nThe tree \n\n";
   Topo.print_tree tree;
-  Printf.printf "\n was compiled into \n\n";
+  Printf.printf "\nwas compiled into \n\n";
   Topo.print_tree compiled_tree;
-  Printf.printf "\n with the mapping \n\n";
-  Hashtbl.iter
-    (fun k v ->
-      Printf.printf "%s -> %s\n" (Topo.sprint_addr k) (Topo.sprint_addr v))
-    embedding
+  Printf.printf "\nwith the mapping \n\n";
+  Topo.print_map map addr_list
 
 let fig3 () =
-  (* A little evidence for the embedding shown in Figure 3. *)
-  embed_verbose Topo.one_level_ternary;
+  (* A little evidence for the embedding shown in Figure 3.
+     Usage: you supply which tree you want to compile, and supply a list
+     (can be empty) of which address queries you want to run on the
+     resulting tree.
+  *)
+  (* Fig 3a *)
+  embed_verbose Topo.one_level_ternary [ []; [ 0 ]; [ 1 ]; [ 2 ] ];
+  (* Fig 3b *)
   embed_verbose Topo.irregular
+    [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 3; 0 ]; [ 3; 1 ]; [ 3; 2 ] ];
+  (* A few more, just for fun. *)
+  embed_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
+  embed_verbose Topo.four_wide [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ] ];
+  embed_verbose Topo.two_level_binary [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ] ]
 
 let simulate () =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
