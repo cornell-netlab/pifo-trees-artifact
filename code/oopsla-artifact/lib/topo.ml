@@ -51,7 +51,7 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
       let t, map, _height = Pifo.top_exn pq in
       (t, map)
   | _ ->
-      (* Grab the shortest two trees. *)
+      (* Extract the shortest two trees. *)
       let (a, map_a, height_a), pq' = Pifo.pop_exn pq in
       let (b, map_b, height_b), pq'' = Pifo.pop_exn pq' in
       (* Do they have the same height? *)
@@ -64,17 +64,27 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
             match (map_a addr, map_b addr) with
             | None, None ->
                 (* If neither of my children can get to it, neither can I. *)
-                None
-            | Some x, None -> Some (0 :: x)
-            (* If the left child knows how to get to it, I'll go via left. *)
-            | None, Some x -> Some (1 :: x)
-            (* If the right child knows how to get to it, I'll go via right. *)
-            | Some x, Some y ->
-                (* Impossible? *)
                 Printf.printf "Treeifying the trees:\n";
                 print_tree a;
                 Printf.printf "and\n";
                 print_tree b;
+                Printf.printf "but neither had maps defined on address %s.\n%!"
+                  (sprint_int_list addr);
+                None
+            | Some x, None ->
+                (* If my left child knows how to get to it, I'll go via left. *)
+                Some (0 :: x)
+            | None, Some x ->
+                (* If my right child knows how to get to it, I'll go via right. *)
+                Some (1 :: x)
+            | Some x, Some y ->
+                (* Impossible? *)
+                Printf.printf "Treeifying the trees:\n";
+                print_tree a;
+                print_map map_a [ [ 0 ]; [ 1 ] ];
+                Printf.printf "and\n";
+                print_tree b;
+                print_map map_b [ [ 0 ]; [ 1 ] ];
                 Printf.printf
                   "but both the trees I extracted had maps defined on address \
                    %s. They are %s and %s.\n\
@@ -97,30 +107,36 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
         in
         treeify pq'''
 
-let build_binary t =
-  let rec helper t : t * map_t =
-    match t with
-    | Star -> (t, fun _ -> None)
-    | Node ts ->
-        let (ts' : (t * map_t * int) list) =
-          List.mapi
-            (fun i t ->
-              (* Get embeddings and maps for all of this node's children. *)
-              let t', map = helper t in
-              (* For each child, add the partial map i -> [] to its map function. *)
-              let map' addr = if addr = [ i ] then Some [] else map addr in
-              (* AM: careful. *)
-              (* Get the height of this tree. *)
-              let height = height t' in
-              (* Put it all together. *)
-              (t', map', height))
-            ts
-        in
-        (* A pifo prioritized by height; shorter is better. *)
-        let pq = Pifo.of_list ts' (fun (_, _, a) (_, _, b) -> a - b) in
-        treeify pq
-  in
-  helper t
+let rec build_binary t =
+  match t with
+  | Star ->
+      (* The embedding of a star is a star, and the map is the identity for []. *)
+      (Star, fun addr -> if addr = [] then Some [] else None)
+  | Node ts ->
+      let (ts' : (t * map_t * int) list) =
+        (* We will decorate this list of subtrees a little. *)
+        List.mapi
+          (fun i t ->
+            (* Get embeddings and maps for the subtrees. *)
+            let t', map = build_binary t in
+            (* For each child, add the binding `i -> []`
+               to its map if it does not already have it. *)
+            (* let map' addr = if map [ i ] = None then Some [] else map addr in *)
+            let map' addr =
+              if addr = [ i ] && map [ i ] = None then Some [] else map addr
+            in
+            (* AM: I think there is a bug here. *)
+            (* Get the height of this tree. *)
+            let height = height t' in
+            (* Put it all together. *)
+            (t', map', height))
+          ts
+      in
+      (* A PIFO of these decorated subtrees, prioritized by height.
+         Shorter is higher-priority.
+      *)
+      let pq = Pifo.of_list ts' (fun (_, _, a) (_, _, b) -> a - b) in
+      treeify pq
 
 let one_level_ternary = Node [ Star; Star; Star ]
 let one_level_binary = Node [ Star; Star ]
