@@ -29,6 +29,7 @@ let sprint_int_list l =
   "[" ^ helper l ^ "]"
 
 let print_map (map : map_t) defined_on =
+  (* Takes a list of addresses that you think the map should be defined on. *)
   let rec helper targets =
     match targets with
     | [] -> ()
@@ -86,9 +87,6 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
                     (sprint_int_list addr) (sprint_int_list x)
                     (sprint_int_list y);
                   failwith "Unification error.")
-          (* failwith *)
-          (* "Impossible: both children have maps defined on the same \ *)
-             (* address." *)
         in
         (* Add the new node to the PQ. *)
         (* The height of this tree is clearly one more than its children. *)
