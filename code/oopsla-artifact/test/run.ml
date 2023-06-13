@@ -23,19 +23,23 @@ let run simulate_fn flow name =
   in
   Packet.write_to_csv c overdue (Printf.sprintf "../../output%s.csv" name)
 
-let embed_verbose tree =
-  let compiled_tree, _mapping = Topo.build_binary tree in
+let embed_verbose tree addr_list =
+  let compiled_tree, map = Topo.build_binary tree in
   Printf.printf "\n\n";
   Topo.print_tree tree;
   Printf.printf "\n was compiled into \n\n";
   Topo.print_tree compiled_tree;
-  Printf.printf "\n with the mapping \n\n"
-(* Topo.print_mapping mapping *)
+  Printf.printf "\n with the mapping \n\n";
+  Topo.print_map map addr_list
 
 let fig3 () =
   (* A little evidence for the embedding shown in Figure 3. *)
-  embed_verbose Topo.one_level_ternary;
-  embed_verbose Topo.irregular
+  (* embed_verbose Topo.one_level_ternary [ []; [ 0 ]; [ 1 ]; [ 2 ] ]; *)
+  embed_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
+  embed_verbose Topo.two_level_binary
+    [ []; [ 0; 1 ]; [ 0; 1 ]; [ 1; 0 ]; [ 1; 1 ] ]
+(* embed_verbose Topo.irregular *)
+(* [ [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 0; 0 ]; [ 3; 0 ] ] *)
 
 let simulate () =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";

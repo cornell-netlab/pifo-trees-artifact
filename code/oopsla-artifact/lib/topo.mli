@@ -1,12 +1,12 @@
 type t = Star | Node of t list
-type addr_t
-type mapping_t = addr_t -> addr_t Option.t
+type addr_t = int list (* AM: remove *)
+type map_t = addr_t -> addr_t Option.t
 
-val build_binary : t -> t * mapping_t
+val build_binary : t -> t * map_t
 val print_tree : t -> unit
-
-(* val print_mapping : mapping_t -> unit *)
+val print_map : map_t -> addr_t list -> unit
 val one_level_ternary : t
+val one_level_binary : t
 val two_level_binary : t
 val two_level_ternary : t
 val three_level_ternary : t
