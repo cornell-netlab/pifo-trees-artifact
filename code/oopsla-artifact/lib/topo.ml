@@ -138,7 +138,7 @@ let rec build_binary t =
 (* A few topologies to play with. *)
 let one_level_ternary = Node [ Star; Star; Star ]
 let one_level_binary = Node [ Star; Star ]
-let two_level_binary = Node [ Node [ Star; Star ]; Node [ Star; Star ] ]
+let two_level_binary = Node [ Node [ Star; Star ]; Star ]
 let two_level_ternary = Node [ Star; Star; Node [ Star; Star; Star ] ]
 
 let three_level_ternary =
