@@ -39,11 +39,10 @@ let fig3 () =
      resulting tree.
   *)
   (* working: *)
-  (* embed_verbose Topo.one_level_ternary [ []; [ 0 ]; [ 1 ]; [ 2 ] ] *)
-  (* embed_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ] *)
-  (* embed_verbose Topo.eight_wide *)
-  (* [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 4 ]; [ 5 ]; [ 6 ]; [ 7 ] ] *)
-
+  embed_verbose Topo.one_level_ternary [ []; [ 0 ]; [ 1 ]; [ 2 ] ];
+  embed_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
+  embed_verbose Topo.eight_wide
+    [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 4 ]; [ 5 ]; [ 6 ]; [ 7 ] ];
   (* not working: when the source is not flat. *)
   embed_verbose Topo.two_level_binary [ []; [ 0 ]; [ 0; 1 ] ]
 (* embed_verbose Topo.irregular *)

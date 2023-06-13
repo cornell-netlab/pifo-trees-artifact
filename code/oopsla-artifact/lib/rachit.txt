@@ -1,0 +1,12 @@
+
+June 13, 2023
+
+10: text by the images? add, mult?
+11: they use their signatures to expose the same interface, and this is cool when it comes to most programming, but _we don't get to live in that fiction. we need to worry about this stuff. in our domain, this is basically lying by omission_.
+28: [nit] I would put `R := new Reg` in its own line. It's the new info of this slide. You can put it in the same line as `Mx` later on...
+30: I have a suggestion re: this animation. Will say live.
+39: "(structural hazards)" could be made prettier somehow.
+43: [nit] "Filament-generated"
+48: show it in math before showing it in code. It will take no more time, just a build-order thing. I missed the math equation until it was too late.
+
+16:10

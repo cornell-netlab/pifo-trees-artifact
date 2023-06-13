@@ -63,7 +63,8 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
         let map' addr =
           match addr with
           | [] -> Some []
-          | _ -> (
+          | [ _ ] -> (
+              (* If we are querying a single step, we just need to step to the root of one of our children. *)
               match (map_a addr, map_b addr) with
               | None, None ->
                   (* If neither of my children can get to it, neither can I. *)
@@ -87,6 +88,7 @@ let rec treeify (pq : (t * map_t * int) Pifo.t) : t * map_t =
                     (sprint_int_list addr) (sprint_int_list x)
                     (sprint_int_list y);
                   failwith "Unification error.")
+          | _h :: _t -> (* TODO: longer path queries! *) None
         in
         (* Add the new node to the PQ. *)
         (* The height of this tree is clearly one more than its children. *)
@@ -119,7 +121,10 @@ let rec build_binary t =
             let map' addr =
               if addr = [ i ] && map [ i ] = None then Some [] else map addr
             in
-            (* AM: I think there is a bug here. *)
+            (* AM: Here I am being careful not to clobber.
+               However, this does mean that we will not tag a node with an existing map for `i`.
+               Bug?
+            *)
             (* Get the height of this tree. *)
             let height = height t' in
             (* Put it all together. *)
