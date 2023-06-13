@@ -1,6 +1,6 @@
 type t = Star | Node of t list
 type addr_t = int list
-type hint_t = int -> unit Option.t
+type hint_t = int -> addr_t Option.t
 type map_t = addr_t -> addr_t Option.t (* A partial map from addr to addr *)
 
 let rec height t =
@@ -64,7 +64,7 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
         let map addr =
           match addr with
           | [] -> Some []
-          | n :: _rest -> (
+          | [ n ] -> (
               (* If we are querying a single step, we just need to step to the root of one of our children. *)
               match (hint_a n, hint_b n) with
               | None, None ->
@@ -76,26 +76,27 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
                   Printf.printf
                     "but neither has a hint defined for the address [%d].\n" n;
                   None
-              | Some _, None ->
+              | Some x, None ->
                   (* If my left child knows how to get to it, I'll go via left. *)
-                  let existing =
-                    match map_a addr with None -> [] | Some x -> x
-                  in
-                  Some (0 :: existing)
-              | None, Some _ ->
+                  Some (0 :: x)
+              | None, Some x ->
                   (* If my right child knows how to get to it, I'll go via right. *)
-                  let existing =
-                    match map_b addr with None -> [] | Some x -> x
-                  in
-                  Some (1 :: existing)
+                  Some (1 :: x)
               | Some _, Some _ -> failwith "Unification error.")
+          | _n :: _rest ->
+              (* If we are querying a longer address, we need to step to the root of one of our children,
+                 then step to the root of the subtree rooted at the next address in the list.
+              *)
+              None
         in
         (* Add the new node to the PQ. *)
         let hint n =
           (* The new hint for the node is the union of the children's hints. *)
+          (* TODO AM: just becomes the same as `map`? *)
           match (hint_a n, hint_b n) with
           | None, None -> None
-          | Some _, None | None, Some _ -> Some ()
+          | Some x, None -> Some (0 :: x)
+          | None, Some x -> Some (1 :: x)
           | Some _, Some _ -> failwith "Unification error."
         in
         (* The height of this tree is clearly one more than its children. *)
@@ -126,9 +127,9 @@ let rec build_binary t =
           (fun i t ->
             (* Get embeddings and maps for the subtrees. *)
             let t', map = build_binary t in
-            (* For each child, add the binding `i -> ()`
-               to its hints map. *)
-            let hint addr = if addr = i then Some () else None in
+            (* For each child, creat a hints map that just has
+               the binding `i -> Some []`. *)
+            let hint addr = if addr = i then Some [] else None in
             (* AM: Here I am being careful not to clobber.
                However, this does mean that we will not tag a node with an existing map for `i`.
                Bug?
