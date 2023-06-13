@@ -12,4 +12,4 @@ val two_level_ternary : t
 val three_level_ternary : t
 val irregular : t
 val complex_binary : t
-val eight_wide : t
+val four_wide : t
