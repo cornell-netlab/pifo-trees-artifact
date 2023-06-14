@@ -3,6 +3,8 @@ type addr_t = int list
 type hint_t = int -> addr_t Option.t (* A partial map from int to addr. *)
 type map_t = addr_t -> addr_t Option.t (* A partial map from addr to addr. *)
 
+let ( let* ) = Option.bind
+
 let rec height t =
   match t with
   | Star -> 1
@@ -134,6 +136,59 @@ let rec build_binary t =
       *)
       let pq = Pifo.of_list ts' (fun (_, _, _, a) (_, _, _, b) -> a - b) in
       treeify pq
+
+let rec remove_prefix (prefix : addr_t) (addr : addr_t) =
+  (* Maybe this is unduly specific to addresses, but ah well. *)
+  match (prefix, addr) with
+  | [], addr -> addr
+  | p :: prefix, a :: addr ->
+      if p = a then remove_prefix prefix addr
+      else failwith "Prefix does not match address."
+  | _ -> failwith "Prefix does not match address."
+
+let rec add_prefix prefix r path_rest =
+  match prefix with
+  | [] -> path_rest
+  | j :: prefix ->
+      (* Add `(j,r)` to the path `path_rest`. *)
+      (j, r) :: add_prefix prefix r path_rest
+
+let rec lift_tilde (f : map_t) tree (path : Path.t) =
+  (* Topology `tree` can embed into some topology `tree'`.
+     We don't need `tree'` as an argument.
+     We have `f`, the partial map that takes
+     addresses in `tree` to addresses in `tree'`.
+     Given a path in `tree`, we want to find the corresponding path in `tree'`.
+  *)
+  match (tree, path) with
+  | Star, [ _ ] ->
+      (* When the toplogy is a star, the embedded topology is also a Star.
+         The path better be a singleton; we can check with via pattern-matching.
+         We return the path unchanged.
+      *)
+      path
+  | Node ts, (i, r) :: pt ->
+      (* When the topology is a node, the embedded topology is a node.
+         The path better be a non-empty list; we can check with via pattern-matching.
+         If this node embeds into node' in the embedded topology,
+         this node's `i`th child embeds somewhere under node' in the embedded topology.
+      *)
+      let f_i addr =
+        (* First we compute that embedding.
+           We need to check what `f` would have said about (i::addr).
+           The resultant list has some prefix that is `f`'s answer for `[i] alone.
+           We must remove that prefix.
+        *)
+        let* whole = f (i :: addr) in
+        let* prefix = f [ i ] in
+        Some (remove_prefix prefix whole)
+      in
+      let path_rest = lift_tilde f_i (List.nth ts i) pt in
+      (* We are not done.
+         For each `j` in the prefix, we must add `(j,r)` to the front of `path_rest`.
+      *)
+      add_prefix (Option.get (f [ i ])) r path_rest
+  | _ -> failwith "Topology and path do not match."
 
 (* A few topologies to play with. *)
 let one_level_ternary = Node [ Star; Star; Star ]
