@@ -7,9 +7,15 @@ let find_flow p =
      This little function converts those integers back into human-readable strings.
   *)
   match Packet.src p with
-  | 17661175009296 -> "A" (* Used to be address 10:10:10:10:10:10. *)
-  | 35322350018592 -> "B" (* 20...*)
-  | 52983525027888 -> "C" (* 30...*)
+  | 17661175009296 ->
+      Printf.printf "A\t";
+      "A" (* Used to be address 10:10:10:10:10:10. *)
+  | 35322350018592 ->
+      Printf.printf "B\t";
+      "B" (* 20...*)
+  | 52983525027888 ->
+      Printf.printf "C\t";
+      "C" (* 30...*)
   | 70644700037184 -> "D" (* 40...*)
   | 88305875046480 -> "E" (* 50...*)
   | 105967050055776 -> "F" (* 60...*)
@@ -156,16 +162,14 @@ module WFQ_Ternary : Alg_t = struct
 
   let topology = Topo.one_level_ternary
 
+  let init_state =
+    State.create 6
+    |> State.rebind "A_weight" 0.1
+    |> State.rebind "B_weight" 0.2
+    |> State.rebind "C_weight" 0.3
+
   let control : Control.t =
-    {
-      s =
-        State.create 6
-        |> State.rebind "A_weight" 0.1
-        |> State.rebind "B_weight" 0.2
-        |> State.rebind "C_weight" 0.3;
-      q = Pifotree.create topology;
-      z = scheduling_transaction;
-    }
+    { s = init_state; q = Pifotree.create topology; z = scheduling_transaction }
 
   let simulate end_time pkts =
     Control.simulate end_time 0.001 poprate pkts control

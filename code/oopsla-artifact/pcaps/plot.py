@@ -71,10 +71,9 @@ def make_plot(df, subplt, name):
 
 
 def plot():
-    for i in ["wfq", "wfq_bin"]:
-    # ["fcfs", "fcfs_bin", "strict", "strict_bin", "rr", "rr_bin",
-            #   "wfq", "wfq_bin", "hpfq", "twopol", "twopol_bin", "threepol",
-            #   "threepol_bin"]:
+    for i in ["fcfs", "fcfs_bin", "strict", "strict_bin", "rr", "rr_bin",
+              "wfq", "wfq_bin", "hpfq", "twopol", "twopol_bin", "threepol",
+              "threepol_bin"]:
         df = pd.read_csv(f"_build/output{i}.csv")
         make_plot(df, plt, i)
 
