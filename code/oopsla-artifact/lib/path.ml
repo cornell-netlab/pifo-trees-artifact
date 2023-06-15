@@ -7,3 +7,11 @@ type t = (int * Rank.t) list
    where the final `rank` is the singeton foot of the list.
    However, the existing version is a little easier to work with.
 *)
+
+let to_string (l : t) : string =
+  let rec loop (l : t) : string =
+    match l with
+    | [] -> "\n"
+    | (i, r) :: t -> Printf.sprintf "%d @ %s\t %s" i (Rank.to_string r) (loop t)
+  in
+  loop l

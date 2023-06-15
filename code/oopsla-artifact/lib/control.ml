@@ -62,12 +62,13 @@ let simulate sim_length sleep pop_tick flow t =
       (* We have a packet to push. *)
       | pkt :: flow' ->
           (* But is it ready to be scheduled? *)
-          if time >= Packet.time pkt then
+          if time >= Packet.time pkt then (
             (* Yes. Push it. *)
             let path, state' = t.z state pkt in
+            Printf.printf "%s" (Path.to_string path);
             let tree' = Pifotree.push tree (Packet.punch_in pkt time) path in
             (* Recurse with tsp = 0.0. *)
-            helper flow' time tsp state' tree' ans
+            helper flow' time tsp state' tree' ans)
           else
             (* Packet wasn't ready to push.
                Sleep and recurse, restoring `flow` to its previous state. *)

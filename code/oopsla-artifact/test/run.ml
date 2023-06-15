@@ -11,7 +11,7 @@ let seven_flows = Packet.pkts_from_file "../pcaps/seven_flows.pcap"
 
 let run simulate_fn flow name =
   (* Duration of time after which to cut off simulation. *)
-  let sim_length = 20.0 in
+  let sim_length = 1.0 in
   let c = simulate_fn sim_length flow in
   (* How do we want to render pushed-but-unpopped items?
    * false: blank lines
@@ -49,18 +49,18 @@ let fig3 () =
   embed_verbose Topo.two_level_binary [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ] ]
 
 let simulate () =
-  run FCFS_Ternary.simulate fcfs_flow "fcfs";
-  run FCFS_Ternary_Bin.simulate fcfs_flow "fcfs_bin";
-  run Strict_Ternary.simulate strict_flow "strict";
-  run Strict_Ternary_Bin.simulate strict_flow "strict_bin";
-  run RRobin_Ternary.simulate rr_flow "rr";
-  run RRobin_Ternary_Bin.simulate rr_flow "rr_bin";
+  (* run FCFS_Ternary.simulate fcfs_flow "fcfs";
+     run FCFS_Ternary_Bin.simulate fcfs_flow "fcfs_bin";
+     run Strict_Ternary.simulate strict_flow "strict";
+     run Strict_Ternary_Bin.simulate strict_flow "strict_bin";
+     run RRobin_Ternary.simulate rr_flow "rr";
+     run RRobin_Ternary_Bin.simulate rr_flow "rr_bin"; *)
   run WFQ_Ternary.simulate wfq_flow "wfq";
-  run WFQ_Ternary_Bin.simulate wfq_flow "wfq_bin";
-  run HPFQ_Binary.simulate two_then_three "hpfq";
-  run TwoPol_Ternary.simulate five_flows "twopol";
-  run TwoPol_Ternary_Bin.simulate five_flows "twopol_bin";
-  run ThreePol_Ternary.simulate seven_flows "threepol";
-  run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
+  run WFQ_Ternary_Bin.simulate wfq_flow "wfq_bin"
+(* run HPFQ_Binary.simulate two_then_three "hpfq";
+   run TwoPol_Ternary.simulate five_flows "twopol";
+   run TwoPol_Ternary_Bin.simulate five_flows "twopol_bin";
+   run ThreePol_Ternary.simulate seven_flows "threepol";
+   run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin" *)
 
 let _ = simulate ()

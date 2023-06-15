@@ -12,7 +12,7 @@ dummy = '1:1:1:1:1:1'
 
 def three_flows():
     packets = []
-    srcs = [a, b, c] * 16 + [a, b]
+    srcs = [a, b, c] * 3 + [a]
     for src in srcs:
         packets += Ether(src=src, dst=dummy) / IP(src='1.1.1.1', dst='1.1.1.1')
     for i, p in enumerate(packets):

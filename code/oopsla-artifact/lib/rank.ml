@@ -6,3 +6,4 @@ let cmp (r1, t1) (r2, t2) =
 
 let create f t = (f, t)
 let time (_, t) = t
+let to_string (f, t) = Printf.sprintf "%.1f / %.1f" f (Time.to_float t)
