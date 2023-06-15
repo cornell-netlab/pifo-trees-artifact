@@ -50,11 +50,17 @@ let fig3 () =
 
 let simulate () =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
+  run FCFS_Ternary_Bin.simulate fcfs_flow "fcfs_bin";
   run Strict_Ternary.simulate strict_flow "strict";
+  run Strict_Ternary_Bin.simulate strict_flow "strict_bin";
   run RRobin_Ternary.simulate rr_flow "rr";
+  run RRobin_Ternary_Bin.simulate rr_flow "rr_bin";
   run WFQ_Ternary.simulate wfq_flow "wfq";
+  run WFQ_Ternary_Bin.simulate wfq_flow "wfq_bin";
   run HPFQ_Binary.simulate two_then_three "hpfq";
   run TwoPol_Ternary.simulate five_flows "twopol";
-  run ThreePol_Ternary.simulate seven_flows "threepol"
+  run TwoPol_Ternary_Bin.simulate five_flows "twopol_bin";
+  run ThreePol_Ternary.simulate seven_flows "threepol";
+  run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
 
 let _ = simulate ()
