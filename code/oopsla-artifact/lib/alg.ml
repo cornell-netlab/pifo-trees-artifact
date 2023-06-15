@@ -430,3 +430,50 @@ module ThreePol_Ternary : Alg_t = struct
   let simulate end_time pkts =
     Control.simulate end_time 0.001 poprate pkts control
 end
+
+module T2B (TernaryAlg : Alg_t) : Alg_t = struct
+  (* We are given an algorithm of type Alg_t that is runs on a ternary tree.
+     We will compile it to run on a binary tree.
+
+     The following things about the original Alg_t are exposed:
+     - topology, the bare tree that it builds a PIFO tree on
+     - control, consisting of
+       + the initial state s
+       + the PIFO tree q that is build from the topology
+       + the scheduling transaction z that is used to build the PIFO tree.
+         Given some state s and a packet pkt, z returns a pair of
+         * a path pt
+         * a new state s'
+       - simulate, which we will not use.
+
+     We proceed as follows:
+     - We build a new binary topology.
+     - We build the embedding map f that maps addresses over the ternary tree those over the binary tree.
+     - We lift f to get a map f-tilde, which maps paths over the ternary tree to paths over the binary tree.
+     - From the scheduling transaction z we get a new scheduling transaction z':
+       Given some state s and a packet pkt,
+       z' returns pair of
+       + a path (f-tilde pt)
+       + a new state s'
+       where pt and s' are gotten by running z s pkt.
+  *)
+  let topology, f = Topo.build_binary TernaryAlg.topology
+  let f_tilde = Topo.lift_tilde f
+
+  let z' s pkt =
+    let pt, s' = TernaryAlg.control.z s pkt in
+    (f_tilde TernaryAlg.topology pt, s')
+
+  let control : Control.t =
+    { s = TernaryAlg.control.s; q = Pifotree.create topology; z = z' }
+
+  let simulate end_time pkts =
+    Control.simulate end_time 0.001 poprate pkts control
+end
+
+module FCFS_Ternary_Bin = T2B (FCFS_Ternary)
+module Strict_Ternary_Bin = T2B (Strict_Ternary)
+module RRobin_Ternary_Bin = T2B (RRobin_Ternary)
+module WFQ_Ternary_Bin = T2B (WFQ_Ternary)
+module TwoPol_Ternary_Bin = T2B (TwoPol_Ternary)
+module ThreePol_Ternary_Bin = T2B (ThreePol_Ternary)
