@@ -437,24 +437,24 @@ module T2B (TernaryAlg : Alg_t) : Alg_t = struct
 
      The following things about the original Alg_t are exposed:
      - topology, the bare tree that it builds a PIFO tree on
-     - control, consisting of
+     - control, consisting of:
        + the initial state s
-       + the PIFO tree q that is build from the topology
-       + the scheduling transaction z that is used to build the PIFO tree.
-         Given some state s and a packet pkt, z returns a pair of
+       + the PIFO tree q that is built from the topology
+       + the scheduling transaction z.
+         Given some state s and some packet pkt, z returns a pair of
          * a path pt
          * a new state s'
        - simulate, which we will not use.
 
      We proceed as follows:
-     - We build a new binary topology.
-     - We build the embedding map f that maps addresses over the ternary tree those over the binary tree.
+     - We build a new binary topology that can accommodate the original ternary topology.
+     - We build the embedding map f that maps addresses over the ternary topology those over the binary topology.
      - We lift f to get a map f-tilde, which maps paths over the ternary tree to paths over the binary tree.
      - From the scheduling transaction z we get a new scheduling transaction z':
        Given some state s and a packet pkt,
        z' returns pair of
-       + a path (f-tilde pt)
-       + a new state s'
+       + a path: f-tilde pt
+       + a new state: s'
        where pt and s' are gotten by running z s pkt.
   *)
   let topology, f = Topo.build_binary TernaryAlg.topology
