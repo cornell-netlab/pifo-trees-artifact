@@ -32,7 +32,7 @@ let embed_verbose tree addr_list =
   Printf.printf "\nwith the mapping \n\n";
   Topo.print_map map addr_list
 
-let fig3 () =
+let embedding_only () =
   (* A little evidence for the embedding shown in Figure 3.
      Usage: you supply which tree you want to compile, and supply a list
      (can be empty) of which address queries you want to run on the
@@ -65,5 +65,6 @@ let simulate_binary () =
   run TwoPol_Ternary_Bin.simulate five_flows "twopol_bin";
   run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
 
+let _ = embedding_only ()
+(* let _ = simulate_binary () *)
 (* let _ = simulate_ternary () *)
-let _ = simulate_binary ()

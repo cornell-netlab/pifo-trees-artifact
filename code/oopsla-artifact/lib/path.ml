@@ -12,7 +12,9 @@ let to_string (l : t) : string =
   let rec loop (l : t) : string =
     match l with
     | [] -> "\n"
-    | [ (_, r) ] -> Printf.sprintf "_ @ %s\n" (Rank.to_string r)
+    | [ (_, r) ] ->
+        (* The integer at the foot of the path is bogus, so we drop it. *)
+        Printf.sprintf "_ @ %s\n" (Rank.to_string r)
     | (i, r) :: t -> Printf.sprintf "%d @ %s\t %s" i (Rank.to_string r) (loop t)
   in
   loop l
