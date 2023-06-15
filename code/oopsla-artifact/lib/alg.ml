@@ -16,7 +16,13 @@ let find_flow p =
   | 123628225065072 -> "G" (* 70...*)
   | n -> failwith Printf.(sprintf "Unknown source address: %d." n)
 
-module FCFS_Ternary = struct
+module type Alg_t = sig
+  val topology : Topo.t
+  val control : Control.t
+  val simulate : float -> Packet.t list -> Packet.t list
+end
+
+module FCFS_Ternary : Alg_t = struct
   let scheduling_transaction (s : State.t) pkt =
     let time = Packet.time pkt in
     match find_flow pkt with
@@ -37,10 +43,12 @@ module FCFS_Ternary = struct
     *)
     | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
+  let topology = Topo.one_level_ternary
+
   let control : Control.t =
     {
       s = State.create 1;
-      q = Pifotree.create Topo.one_level_ternary;
+      q = Pifotree.create topology;
       z = scheduling_transaction;
     }
 
@@ -48,7 +56,7 @@ module FCFS_Ternary = struct
     Control.simulate end_time 0.001 poprate pkts control
 end
 
-module Strict_Ternary = struct
+module Strict_Ternary : Alg_t = struct
   let scheduling_transaction (s : State.t) pkt =
     let time = Packet.time pkt in
     let int_for_root, rank_for_root =
@@ -63,10 +71,12 @@ module Strict_Ternary = struct
     in
     ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s)
 
+  let topology = Topo.one_level_ternary
+
   let control : Control.t =
     {
       s = State.create 1;
-      q = Pifotree.create Topo.one_level_ternary;
+      q = Pifotree.create topology;
       z = scheduling_transaction;
     }
 
@@ -74,7 +84,7 @@ module Strict_Ternary = struct
     Control.simulate end_time 0.001 poprate pkts control
 end
 
-module RRobin_Ternary = struct
+module RRobin_Ternary : Alg_t = struct
   let scheduling_transaction s pkt =
     let time = Packet.time pkt in
     let flow = find_flow pkt in
@@ -99,10 +109,12 @@ module RRobin_Ternary = struct
     in
     ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s')
 
+  let topology = Topo.one_level_ternary
+
   let control : Control.t =
     {
       s = State.create 3;
-      q = Pifotree.create Topo.one_level_ternary;
+      q = Pifotree.create topology;
       z = scheduling_transaction;
     }
 
@@ -122,7 +134,7 @@ let wfq_helper s weight var_last_finish pkt_len time : Rank.t * State.t =
   let s' = State.rebind var_last_finish (rank +. (pkt_len /. weight)) s in
   (Rank.create rank time, s')
 
-module WFQ_Ternary = struct
+module WFQ_Ternary : Alg_t = struct
   let scheduling_transaction s pkt =
     let time = Packet.time pkt in
     let flow = find_flow pkt in
@@ -142,6 +154,8 @@ module WFQ_Ternary = struct
     in
     ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s')
 
+  let topology = Topo.one_level_ternary
+
   let control : Control.t =
     {
       s =
@@ -149,7 +163,7 @@ module WFQ_Ternary = struct
         |> State.rebind "A_weight" 0.1
         |> State.rebind "B_weight" 0.2
         |> State.rebind "C_weight" 0.3;
-      q = Pifotree.create Topo.one_level_ternary;
+      q = Pifotree.create topology;
       z = scheduling_transaction;
     }
 
@@ -157,7 +171,7 @@ module WFQ_Ternary = struct
     Control.simulate end_time 0.001 poprate pkts control
 end
 
-module HPFQ_Binary = struct
+module HPFQ_Binary : Alg_t = struct
   let scheduling_transaction s pkt =
     let time = Packet.time pkt in
     let flow = find_flow pkt in
@@ -209,6 +223,8 @@ module HPFQ_Binary = struct
         ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
     | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
+  let topology = Topo.two_level_binary
+
   let control : Control.t =
     {
       s =
@@ -217,7 +233,7 @@ module HPFQ_Binary = struct
         |> State.rebind "A_weight" 0.75
         |> State.rebind "B_weight" 0.25
         |> State.rebind "C_weight" 0.2;
-      q = Pifotree.create Topo.two_level_binary;
+      q = Pifotree.create topology;
       z = scheduling_transaction;
     }
 
@@ -225,7 +241,7 @@ module HPFQ_Binary = struct
     Control.simulate end_time 0.001 poprate pkts control
 end
 
-module TwoPol_Ternary = struct
+module TwoPol_Ternary : Alg_t = struct
   let scheduling_transaction s pkt =
     let time = Packet.time pkt in
     let flow = find_flow pkt in
@@ -273,6 +289,8 @@ module TwoPol_Ternary = struct
           s' )
     | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
+  let topology = Topo.two_level_ternary
+
   let control : Control.t =
     {
       s =
@@ -280,7 +298,7 @@ module TwoPol_Ternary = struct
         |> State.rebind "A_weight" 0.1
         |> State.rebind "B_weight" 0.1
         |> State.rebind "CDE_weight" 0.8;
-      q = Pifotree.create Topo.two_level_ternary;
+      q = Pifotree.create topology;
       z = scheduling_transaction;
     }
 
@@ -288,7 +306,7 @@ module TwoPol_Ternary = struct
     Control.simulate end_time 0.001 poprate pkts control
 end
 
-module ThreePol_Ternary = struct
+module ThreePol_Ternary : Alg_t = struct
   let scheduling_transaction s pkt =
     let time = Packet.time pkt in
     let flow = find_flow pkt in
@@ -393,6 +411,8 @@ module ThreePol_Ternary = struct
           s''' )
     | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
+  let topology = Topo.three_level_ternary
+
   let control : Control.t =
     {
       s =
@@ -403,7 +423,7 @@ module ThreePol_Ternary = struct
         |> State.rebind "E_weight" 0.1
         |> State.rebind "F_weight" 0.4
         |> State.rebind "G_weight" 0.5;
-      q = Pifotree.create Topo.three_level_ternary;
+      q = Pifotree.create topology;
       z = scheduling_transaction;
     }
 

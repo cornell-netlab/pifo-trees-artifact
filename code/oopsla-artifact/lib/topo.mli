@@ -5,6 +5,7 @@ type map_t = addr_t -> addr_t Option.t
 val build_binary : t -> t * map_t
 val print_tree : t -> unit
 val print_map : map_t -> addr_t list -> unit
+val lift_tilde : map_t -> t -> Path.t -> Path.t
 
 (* A few topologies to play with. *)
 val one_level_ternary : t
