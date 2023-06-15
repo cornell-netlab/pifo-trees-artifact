@@ -27,9 +27,9 @@ let embed_verbose tree addr_list =
   let compiled_tree, map = Topo.build_binary tree in
   Printf.printf "\n\nThe tree \n\n";
   Topo.print_tree tree;
-  Printf.printf "\nwas compiled into \n\n";
+  Printf.printf "\nwill embed into the tree \n\n";
   Topo.print_tree compiled_tree;
-  Printf.printf "\nwith the mapping \n\n";
+  Printf.printf "\nwith the map \n\n";
   Topo.print_map map addr_list
 
 let embedding_only () =

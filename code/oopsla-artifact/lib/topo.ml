@@ -35,18 +35,16 @@ let print_map (map : map_t) defined_on =
     in
     "[" ^ helper l ^ "]"
   in
-  let rec helper targets =
-    match targets with
-    | [] -> ()
-    | target :: rest ->
-        Printf.printf "%s -> %s // " (sprint_int_list target)
+  let map_str targets =
+    List.map
+      (fun target ->
+        Printf.sprintf "%s -> %s" (sprint_int_list target)
           (match map target with
           | None -> Printf.sprintf "_" (* Not defined. *)
-          | Some x -> sprint_int_list x);
-        helper rest
+          | Some x -> sprint_int_list x))
+      targets
   in
-  helper defined_on;
-  print_newline ()
+  Printf.printf "{  %s  }\n" (String.concat "; " (map_str defined_on))
 
 let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
   match Pifo.length pq with
