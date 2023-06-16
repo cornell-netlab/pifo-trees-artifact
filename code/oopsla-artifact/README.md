@@ -4,7 +4,7 @@
 
 ## Overview
 
-This is an artifact in support of our OOPSLA '23 paper _Formal Abstractions for Packet Scheduling_.
+This is an artifact in support of our [paper][arxiv] _Formal Abstractions for Packet Scheduling_.
 It implements several key definitions from the paper, and can be used to generate the visualizations that we show towards the end of the paper.
 
 
@@ -21,7 +21,7 @@ To see how scheduling transactions may be created and how Controls may be genera
 One of the contributions of the paper is an embedding algorithm that takes one from one topology to another.
 That is implemented as `build_binary` under lib/topo.ml; it returns both the binary topology and the embedding map from the source topology to the destination (binary) topology.
 
-The same file also has `lift_tilde`, which lifts an embeddig map `f : Topo.t -> Topo.t` to instead operate over paths, i.e. `f-tilde: Path.t -> Path.t`.
+The same file also has `lift_tilde`, which lifts an embedding map `f : Topo.t -> Topo.t` to instead operate over paths, i.e. `f-tilde: Path.t -> Path.t`.
 
 To see how these can be orchestrated to convert ternary _algorithms_ into binary algorithms, study the functor `T2B` under `lib/alg.ml`.
 
@@ -43,3 +43,5 @@ To run these tests,
 2. Go into `test/run.ml` and toggle what the target of `let _ = ...` is.
 3. Run `dune test`.
 4. To visualize the results, run `python3 pcaps/plot.py; open *.png`.
+
+[arvix]: https://arxiv.org/abs/2211.11659
