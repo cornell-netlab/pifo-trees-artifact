@@ -1,67 +1,45 @@
 
-# TODO: rewrite completely.
-
-# Overview
+# Formal Abstractions for Packet Scheduling
 
 
-A simulator implementating "Lazy Sivaraman with Shaping":
-* the algorithms presented in Sivaraman et. al.'s PIFO Trees paper,
-* run through a PIFO tree as they describe,
-* with thoughtful treatment of shaped algorithms,
-* but with laziness when it comes to "housekeeping" the tree.
+## Overview
 
-# Lazy Housekeeping
+This is an artifact in support of our OOPSLA '23 paper _Formal Abstractions for Packet Scheduling_.
+It implements several key definitions from the paper, and can be used to generate the visualizations that we show towards the end of the paper.
 
-In the absence of shaping, pushing an element into a leaf node immediately
-triggers the _propagation_ of that element upwards.
-That is to say, a pointer to that packet is pushed into its parent node.
-The routine runs recursively until the root node receives a pointer.
 
-However, in the presence of shaping, an element may not be ready for propagation
-at the time of enqueing.
-A _shaping transaction_ is run at the time of enqueing;
-this yields the packet's _earliest requested release time_.
-If the simulated time passes an element's earliest requested release time,
-we say the element is "ripe".
-Only ripe elements should be propagated.
-For uniformity, we say that unshaped elements are immediately ripe.
+## Key Definitions
 
-The existing literature loosely assumes that ripe elements are detected and
-propagated immediately.
-We take a different approach:
-* We design a routine `housekeeping_minimal_any`, which chooses a random node,
-  and, if the node's head element is ripe, propagates that element
-  by one level.
-  It is minimal (or lazy, if you will) in several ways:
-    * It does not recurse: the parent will itself have to be housekept.
-    * It does not check beyond the head: the present node itself could use
-      more housekeeping.
-* At a user-defined frequency, we pause other `push`/`pop` activity and
-  run `housekeeping_minimal_any` on the tree.
-  At a sufficiently high housekeeping frequency, this approaches the assumption
-  that the existing literature makes.
-  However, there does remain the possibility that a ripe element is not known
-  to the root because of tardy housekeeping.
-We argue that our method is easier to reason about in a single-threaded setting.
+Topo, PIFOTree, and Control, along with straightforward supporting methods such as `flush`, `snap`, `size`, etc are defined in the relevant files.
+Topologies are written by hand and then converted into empty PIFOTrees using a `create` method.
+Scheduling transactions are written by hand.
+To see how scheduling transactions may be created and how Controls may be generated atop of these, study a simple example such as FCFS under `lib/alg.ml`.
 
-# Generating PCAPs
+
+## Embedding Algorithm
+
+One of the contributions of the paper is an embedding algorithm that takes one from one topology to another.
+That is implemented as `build_binary` under lib/topo.ml; it returns both the binary topology and the embedding map from the source topology to the destination (binary) topology.
+
+The same file also has `lift_tilde`, which lifts an embeddig map `f : Topo.t -> Topo.t` to instead operate over paths, i.e. `f-tilde: Path.t -> Path.t`.
+
+To see how these can be orchestrated to convert ternary _algorithms_ into binary algorithms, study the functor `T2B` under `lib/alg.ml`.
+
+
+## Generating PCAPs
 
 We provide a short Python script that generates toy PCAP files: `pcaps/pcap_gen.py`.
 
-# Running Algorithms
 
-Our reference algorithms, written in the style of Sivaraman et. al.'s
-PIFO Trees paper, are in `lib/alg.ml`.
-An algorithm can be run against a PCAP as shown in `test/run.ml`.
-Running an algorithm causes an output to be written in CSV format.
-These CSVs are then visualized by `pcaps.plot.py`.
+## Testing
 
-# Installing and Running
+`test/run.ml` contains a few scripts that may be of interest.
+1. `embedding_only` runs the embedding algorithm over a few sample topologies and pretty-prints the answer.
+2. `simulate_handwritten` runs sample PCAPS through the algorithms that we have written by hand.
+3. `simulate_binary` runs sample PCAPS through the binary algorithms that we have generated via compilation.
 
-Starting at `pifotrees/LazySiv/`, run `opam install . --deps-only` to install dependencies.
-
-Then the following script will build, run, and visualize our most interesting results:
-`python pcaps/pcap_gen.py; dune clean; dune build; dune test; python pcaps/plot.py`
-
-This can be thinned out in the obvious way; for example, there is no
-need to generate the PCAPs anew each time or to clean/build each time.
+To run these tests,
+1. Run `opam install . --deps-only` in the directory `oopsla-artifact` to install our dependencies.
+2. Go into `test/run.ml` and toggle what the target of `let _ = ...` is.
+3. Run `dune test`.
+4. To visualize the results, run `python3 pcaps/plot.py; open *.png`.

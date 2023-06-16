@@ -43,16 +43,19 @@ let embedding_only () =
   (* Fig 3b *)
   embed_verbose Topo.irregular
     [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 3; 0 ]; [ 3; 1 ]; [ 3; 2 ] ];
+
   (* A few more, just for fun. *)
   embed_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
   embed_verbose Topo.four_wide [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ] ];
-  embed_verbose Topo.two_level_binary [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ] ]
+  embed_verbose Topo.two_level_binary [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ] ];
+  embed_verbose Topo.irregular []
 
-let simulate_ternary () =
+let simulate_handwritten () =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
   run Strict_Ternary.simulate strict_flow "strict";
   run RRobin_Ternary.simulate rr_flow "rr";
   run WFQ_Ternary.simulate wfq_flow "wfq";
+  run HPFQ_Binary.simulate two_then_three "hpfq";
   run TwoPol_Ternary.simulate five_flows "twopol";
   run ThreePol_Ternary.simulate seven_flows "threepol"
 
@@ -61,11 +64,9 @@ let simulate_binary () =
   run Strict_Ternary_Bin.simulate strict_flow "strict_bin";
   run RRobin_Ternary_Bin.simulate rr_flow "rr_bin";
   run WFQ_Ternary_Bin.simulate wfq_flow "wfq_bin";
-  run HPFQ_Binary.simulate two_then_three "hpfq";
   run TwoPol_Ternary_Bin.simulate five_flows "twopol_bin";
   run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
 
-let _ =
-  embedding_only ();
-  simulate_binary ();
-  simulate_ternary ()
+let _ = embedding_only ()
+(* let _ = simulate_handwritten () *)
+(* let _ = simulate_binary () *)
