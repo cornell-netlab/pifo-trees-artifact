@@ -4,8 +4,7 @@ type t =
   | Leaf of (Packet.t * Rank.t) Pifo.t
   | Internal of (t list * (int * Rank.t) Pifo.t)
 
-let rec pop t =
-  match t with
+let rec pop = function
   | Leaf p ->
       let* (pkt, _), p' = Pifo.pop p in
       Some (pkt, Leaf p')
@@ -23,9 +22,8 @@ let rec push t pkt path =
       Internal (Util.replace_nth qs i q', p')
   | _ -> failwith "Push: invalid path"
 
-let rec size t =
+let rec size = function
   (* The size of a PIFO tree is the number of packets in its leaves. *)
-  match t with
   | Leaf p -> Pifo.length p
   | Internal (qs, _p) -> List.fold_left (fun acc q -> acc + size q) 0 qs
 
@@ -44,8 +42,7 @@ let rec well_formed t =
       List.fold_left ( && ) true
         (List.mapi (fun i q -> well_formed q && pifo_count_occ p i = size q) qs)
 
-let rec snapshot t =
-  match t with
+let rec snapshot = function
   | Leaf p -> [ List.map fst (Pifo.flush p) ]
   | Internal (qs, _p) -> List.fold_left (fun acc q -> acc @ snapshot q) [] qs
 

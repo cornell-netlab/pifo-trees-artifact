@@ -9,8 +9,7 @@ type t = (int * Rank.t) list
 *)
 
 let to_string (l : t) : string =
-  let rec loop (l : t) : string =
-    match l with
+  let rec loop = function
     | [] -> "\n"
     | [ (_, r) ] ->
         (* The integer at the foot of the path is bogus, so we drop it. *)

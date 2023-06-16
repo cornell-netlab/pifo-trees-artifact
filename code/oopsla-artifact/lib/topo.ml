@@ -5,15 +5,13 @@ type map_t = addr_t -> addr_t Option.t (* A partial map from addr to addr. *)
 
 let ( let* ) = Option.bind
 
-let rec height t =
-  match t with
+let rec height = function
   | Star -> 1
   | Node trees -> 1 + List.fold_left max 0 (List.map height trees)
 
 let print_tree t =
   (* Just for fun, to see trees change as they are embedded. *)
-  let rec print_tree_helper space t =
-    match t with
+  let rec print_tree_helper space = function
     | Star -> Printf.printf "%s *\n" space
     | Node trees ->
         Printf.printf "%s *--------\n" space;
@@ -27,8 +25,7 @@ let print_map (map : map_t) defined_on =
      Takes a list of addresses that you think the map should be defined on.
   *)
   let sprint_int_list l =
-    let rec helper l =
-      match l with
+    let rec helper = function
       | [] -> ""
       | [ x ] -> string_of_int x
       | x :: xs -> string_of_int x ^ ", " ^ helper xs
@@ -63,8 +60,7 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
       if height_a = height_b then
         (* Yes! Make a new node, a new embedding map, and new hint map. *)
         let node = Node [ a; b ] in
-        let map addr =
-          match addr with
+        let map = function
           | [] -> Some []
           | n :: rest -> (
               (* The step n will determine which of our children we'll rely on.
@@ -108,8 +104,7 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
         in
         treeify pq'''
 
-let rec build_binary t =
-  match t with
+let rec build_binary = function
   | Star ->
       (* The embedding of a Star is a Star, and the map is the identity for []. *)
       (Star, fun addr -> if addr = [] then Some [] else None)
