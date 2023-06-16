@@ -37,7 +37,7 @@ let rec well_formed t =
         times the present node refers to that child in _its own_ PIFO.
   *)
   let pifo_count_occ p ele = Pifo.count (fun (v, _) -> v = ele) p in
-  (* Counts how many times `ele` occurs as a value in PIFO `p`. *)
+  (* Counts how many times ele occurs as a value in PIFO p. *)
   match t with
   | Leaf _ -> true
   | Internal (qs, p) ->

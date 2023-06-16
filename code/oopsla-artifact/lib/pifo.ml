@@ -12,7 +12,7 @@ let length = Fheap.length
 let of_list l cmp = Fheap.of_list l ~compare:cmp
 
 let count f t =
-  (* Count how many elements in the PIFO satisfy `f`. *)
+  (* Count how many elements in the PIFO satisfy f. *)
   List.fold_left (fun acc x -> if f x then acc + 1 else acc) 0 (Fheap.to_list t)
 
 let flush t =

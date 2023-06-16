@@ -67,8 +67,8 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
           match addr with
           | [] -> Some []
           | n :: rest -> (
-              (* The step `n` will determine which of our children we'll rely on.
-                 The `rest` will be processed by that child's map.
+              (* The step n will determine which of our children we'll rely on.
+                 The rest will be processed by that child's map.
               *)
               match (hint_a n, hint_b n) with
               (* If neither of my children can get to it, neither can I. *)
@@ -84,7 +84,7 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
         let hint n =
           (* The new hint for the node is the union of the children's hints,
              but, since we are growing taller by one level, we need to arbitrate
-             _between_ those two children using `0` or `1` as a prefix.
+             _between_ those two children using 0 or 1 as a prefix.
           *)
           match (hint_a n, hint_b n) with
           | None, None -> None
@@ -121,7 +121,7 @@ let rec build_binary t =
             (* Get embeddings and maps for the subtrees. *)
             let t', map = build_binary t in
             (* For each child, creat a hints map that just has
-               the binding `i -> Some []`. *)
+               the binding i -> Some []. *)
             let hint addr = if addr = i then Some [] else None in
             (* Get the height of this tree. *)
             let height = height t' in
@@ -148,15 +148,15 @@ let rec add_prefix prefix r path_rest =
   match prefix with
   | [] -> path_rest
   | j :: prefix ->
-      (* Add `(j,r)` to the path `path_rest`. *)
+      (* Add (j,r) to the path path_rest. *)
       (j, r) :: add_prefix prefix r path_rest
 
 let rec lift_tilde (f : map_t) tree (path : Path.t) =
-  (* Topology `tree` can embed into some topology `tree'`.
-     We don't need `tree'` as an argument.
-     We have `f`, the partial map that takes
-     addresses in `tree` to addresses in `tree'`.
-     Given a path in `tree`, we want to find the corresponding path in `tree'`.
+  (* Topology tree can embed into some topology tree'.
+     We don't need tree' as an argument.
+     We have f, the partial map that takes
+     addresses in tree to addresses in tree'.
+     Given a path in tree, we want to find the corresponding path in tree'.
   *)
   match (tree, path) with
   | Star, [ _ ] ->
@@ -169,12 +169,12 @@ let rec lift_tilde (f : map_t) tree (path : Path.t) =
       (* When the topology is a node, the embedded topology is a node.
          The path better be a non-empty list; we can check with via pattern-matching.
          If this node embeds into node' in the embedded topology,
-         this node's `i`th child embeds somewhere under node' in the embedded topology.
+         this node's ith child embeds somewhere under node' in the embedded topology.
       *)
       let f_i addr =
         (* First we compute that embedding.
-           We need to check what `f` would have said about (i::addr).
-           The resultant list has some prefix that is `f`'s answer for `[i] alone.
+           We need to check what f would have said about (i::addr).
+           The resultant list has some prefix that is f's answer for [i] alone.
            We must remove that prefix.
         *)
         let* whole = f (i :: addr) in
@@ -183,7 +183,7 @@ let rec lift_tilde (f : map_t) tree (path : Path.t) =
       in
       let path_rest = lift_tilde f_i (List.nth ts i) pt in
       (* We are not done.
-         For each `j` in the prefix, we must add `(j,r)` to the front of `path_rest`.
+         For each j in the prefix, we must add (j,r) to the front of path_rest.
       *)
       add_prefix (Option.get (f [ i ])) r path_rest
   | _ -> failwith "Topology and path do not match."

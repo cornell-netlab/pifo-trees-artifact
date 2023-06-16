@@ -65,6 +65,7 @@ let simulate_binary () =
   run TwoPol_Ternary_Bin.simulate five_flows "twopol_bin";
   run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
 
-let _ = embedding_only ()
-(* let _ = simulate_binary () *)
-(* let _ = simulate_ternary () *)
+let _ =
+  embedding_only ();
+  simulate_binary ();
+  simulate_ternary ()
