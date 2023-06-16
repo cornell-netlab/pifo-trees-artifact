@@ -17,11 +17,11 @@ let count f t =
 
 let flush t =
   (* Pop the PIFO repeatedly until it is empty.
-     Return a list of its elements, in the order they were popped.
+     Return a list of its elements in the order they were popped.
   *)
   let rec helper acc =
     match peek t with
-    | None -> acc
+    | None -> List.rev acc
     | Some x ->
         ignore (pop_exn t);
         helper (x :: acc)

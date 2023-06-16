@@ -6,7 +6,7 @@ let lookup v t =
   try Hashtbl.find t v
   with Not_found -> failwith (Printf.sprintf "Uninitialized variable: %s" v)
 
-(* we do a more aggressive rebind because
+(* We do a more aggressive rebind because the library version is a little weird.
     "Hashtbl.add tbl key data adds a binding of key to data in table tbl.
      Previous bindings for key are not removed, but simply hidden.
      _That is, after performing Hashtbl.remove tbl key,

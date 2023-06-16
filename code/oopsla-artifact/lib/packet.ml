@@ -34,14 +34,14 @@ type pcap_header_t = {
 }
 
 type pcap = {
-  (* A PCAP will then consist of a header and a list of packet-metadata.
+  (* A PCAP will consist of a header and a list of packet-metadata.
      This is what we'll parse from a file.pcap. *)
   header : pcap_header_t;
   packets : t list;
 }
 
 let complete_to_meta (p : packet_complete) =
-  (* We can discard some information and keep just the metadata in this way. *)
+  (* This is how we'll discard unnecessary packet information and keep just the metadata. *)
   {
     time = p.header.time;
     len = Int32.to_int p.header.size_incl;
@@ -56,10 +56,11 @@ let time t = t.time
 let src t = t.src
 
 let len t =
-  (* The only user of this immediately converts
-     it into a float, so we just do it here. *)
+  (* The only user of this immediately converts it into a float, so we just do it here. *)
   float_of_int t.len
 
+(* It will become useful to modify these timing fields as the packet enters and leaves
+   the scheduler. This is just for the purposes of our visualization. *)
 let punch_in t time = { t with pushed = Some time }
 let punch_out t time = { t with popped = Some time }
 
@@ -77,7 +78,7 @@ let create_pcap_header h buf =
   }
 
 let create_pkt h (ph, pb) =
-  (* `ph` is the packet header; `pb` is the packet body. *)
+  (* ph is the packet header; pb is the packet body. *)
   let module H = (val h : HDR) in
   let hex_to_int = function `Hex s -> int_of_string ("0x" ^ s) in
   let header =
@@ -130,6 +131,7 @@ let pkts_from_file filename =
   pcap.packets
 
 let write_to_csv ts overdue filename =
+  (* This is the CSV format that out plot.py method expects downstream. *)
   let format_to_csv metas overdue =
     let headers =
       "\"src\", \"dst\", \"arrived\", \"length\", \"pushed\", \"popped\""

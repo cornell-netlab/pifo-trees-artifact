@@ -32,7 +32,9 @@ module FCFS_Ternary : Alg_t = struct
     (* Put flow A into leaf 0, flow B into leaf 1, and flow C into leaf 2.
        The ranks at the root are straightforward: nothing fancy to do with
        the float portion proper, but we do register the time of the packet's
-       scheduling. This means that FCFS prevails overall.
+       scheduling.
+       Since the float portion of the rank is always a tie, the time is used to break ties.
+       This means that FCFS prevails overall.
        Doing the same thing at the leaves means that FCFS prevails there too.
        Going forward, we will frequently give the the leaves FCFS scheduling in this way.
 
@@ -107,6 +109,7 @@ module RRobin_Ternary : Alg_t = struct
       | "C" -> 2
       | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
     in
+    (* The ranks are as calculated above. *)
     ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s')
 
   let topology = Topo.one_level_ternary
@@ -124,7 +127,7 @@ end
 
 let wfq_helper s weight var_last_finish pkt_len time : Rank.t * State.t =
   (* The WFQ-style algorithms have a common pattern,
-      so we lift it into this helper.
+      so we lift it into this helper method.
   *)
   let rank =
     if State.isdefined var_last_finish s then

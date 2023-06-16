@@ -5,7 +5,7 @@ let simulate sim_length sleep pop_tick flow t =
   (* The user gives us:
      - sim_length: after how many seconds to stop simulating.
      - sleep: how long to sleep when there's no work to do.
-     - pop_tick: a threshold for when next to try a Pop.
+     - pop_tick: a threshold for when next to try a pop.
      - flow: the packet flow to simulate, essentially a list of packets.
      - t: the control to simulate over.
 
