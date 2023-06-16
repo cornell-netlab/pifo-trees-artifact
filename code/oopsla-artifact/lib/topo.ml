@@ -193,9 +193,4 @@ let three_level_ternary =
   Node [ Star; Star; Node [ Star; Star; Node [ Star; Star; Star ] ] ]
 
 let irregular = Node [ Star; Star; Star; Node [ Star; Star; Star ] ]
-
-let complex_binary =
-  Node
-    [ Node [ Node [ Star; Star ]; Star ]; Node [ Node [ Star; Star ]; Star ] ]
-
 let four_wide = Node [ Star; Star; Star; Star ]

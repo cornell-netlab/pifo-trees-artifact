@@ -13,7 +13,8 @@ let to_string (l : t) : string =
     | [] -> "\n"
     | [ (_, r) ] ->
         (* The integer at the foot of the path is bogus, so we drop it. *)
-        Printf.sprintf "_ @ %s\n" (Rank.to_string r)
-    | (i, r) :: t -> Printf.sprintf "%d @ %s\t %s" i (Rank.to_string r) (loop t)
+        Printf.sprintf "_ @ %s\n" (Rank.to_string false r)
+    | (i, r) :: t ->
+        Printf.sprintf "%d @ %s\t %s" i (Rank.to_string false r) (loop t)
   in
   loop l
