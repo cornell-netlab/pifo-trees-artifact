@@ -43,9 +43,15 @@ let print_map (map : map_t) defined_on =
   in
   Printf.printf "{  %s  }\n" (String.concat "; " (map_str defined_on))
 
-let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
+let rec merge_into_one_topo (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t
+    =
+  (* Accepts a priority queue of PIFO trees ordered by (minimum) height.
+     Each tree is further accompanied by the embedding function that maps some
+     subtree of a source tree onto the tree in question.
+     This method merges the PQ's trees into one tree, as described in the paper.
+  *)
   match Pifo.length pq with
-  | 0 -> failwith "Cannot treeify empty PQ."
+  | 0 -> failwith "Cannot merge an empty PQ of topologies."
   | 1 ->
       (* Success: there was just one tree left.
          Discard the hint and the height and return the tree and its map.
@@ -93,7 +99,7 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
         (* Add the new node to the priority queue. *)
         let pq''' = Pifo.push pq'' (node, hint, map, height) in
         (* Recurse. *)
-        treeify pq'''
+        merge_into_one_topo pq'''
       else
         (* No, the two shortest trees had different heights.
            Reinsert the two trees, the first with its height artificially increased by one, and recurse. *)
@@ -102,7 +108,7 @@ let rec treeify (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t =
             (Pifo.push pq'' (a, hint_a, map_a, height_a + 1))
             (b, hint_b, map_b, height_b)
         in
-        treeify pq'''
+        merge_into_one_topo pq'''
 
 let rec build_binary = function
   | Star ->
@@ -128,7 +134,7 @@ let rec build_binary = function
          Shorter is higher-priority.
       *)
       let pq = Pifo.of_list ts' (fun (_, _, _, a) (_, _, _, b) -> a - b) in
-      treeify pq
+      merge_into_one_topo pq
 
 let rec remove_prefix (prefix : addr_t) (addr : addr_t) =
   (* Maybe this is unduly specific to addresses, but ah well. *)

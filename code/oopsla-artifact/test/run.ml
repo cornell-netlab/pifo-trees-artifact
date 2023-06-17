@@ -48,7 +48,8 @@ let embedding_only () =
   embed_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
   embed_verbose Topo.four_wide [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ] ];
   embed_verbose Topo.two_level_binary [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ] ];
-  embed_verbose Topo.irregular []
+  embed_verbose Topo.irregular
+    [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 3; 0 ]; [ 3; 1 ]; [ 3; 2 ] ]
 
 let simulate_handwritten () =
   run FCFS_Ternary.simulate fcfs_flow "fcfs";
@@ -68,5 +69,5 @@ let simulate_binary () =
   run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
 
 let _ = embedding_only ()
-(* let _ = simulate_handwritten () *)
+let _ = simulate_handwritten ()
 (* let _ = simulate_binary () *)
