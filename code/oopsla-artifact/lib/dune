@@ -1,5 +1,12 @@
 (library
  (name pifotrees_lib)
- (libraries csv core_kernel.fheap pcap-format hex mmap)
+ (libraries
+  csv
+  core_kernel.fheap
+  pcap-format
+  hex
+  mmap
+  printbox
+  printbox-text)
  (preprocess
   (pps ppx_cstruct)))
