@@ -10,14 +10,16 @@ let rec height = function
   | Node trees -> 1 + List.fold_left max 0 (List.map height trees)
 
 let print_tree t =
-  (* Just for fun, to see trees change as they are embedded. *)
-  let rec print_tree_helper space = function
-    | Star -> Printf.printf "%s *\n" space
-    | Node trees ->
-        Printf.printf "%s *--------\n" space;
-        ignore (List.map (print_tree_helper (space ^ "\t")) trees)
+  (* Just for fun, to see trees change as they are embedded.
+     We convert the topology into a PrintBox tree and
+     then use PrintBox_text to pretty-print to screen.
+  *)
+  let rec to_printbox t : PrintBox.t =
+    match t with
+    | Star -> PrintBox.tree (PrintBox.text "*") []
+    | Node ts -> PrintBox.tree (PrintBox.text "Node") (List.map to_printbox ts)
   in
-  print_tree_helper "" t;
+  PrintBox_text.output stdout (to_printbox t);
   print_newline ()
 
 let print_map (map : map_t) defined_on =
