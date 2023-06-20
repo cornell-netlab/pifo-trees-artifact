@@ -78,8 +78,7 @@ let pop_d_topos pq d =
   let one, two = helper pq' m [ topo_one ] (d - 1) in
   (one, two, m)
 
-let rec merge_into_one_topo (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t
-    =
+let rec merge_into_one_topo pq d : t * map_t =
   (* Accepts a priority queue of PIFO trees ordered by (minimum) height.
      Each tree is further accompanied by the embedding function that maps some
      subtree of a source tree onto the tree in question.
@@ -102,27 +101,43 @@ let rec merge_into_one_topo (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t
              Reinsert it with height m+1 and recurse.
           *)
           let pq'' = Pifo.push pq' (topo, hint, map, m + 1) in
-          merge_into_one_topo pq''
-      | [ (a, hint_a, map_a, _); (b, hint_b, map_b, _) ] ->
-          (* There were two trees with height m.
-             Make a new node, a new embedding map, and new hint map.
+          merge_into_one_topo pq'' d
+      | _ ->
+          (* There were two or more trees with height m.
+             Pad the tree list with Stars until it has length d.
+             Then make a new node with those d topologies as its children.
+             Make, also, a new embedding map and a new hint map.
           *)
-          let node = Node [ a; b ] in
+          let k = List.length trees in
+          let trees' =
+            trees
+            @ List.init (d - k) (fun _ ->
+                  (Star, (fun _ -> None), (fun _ -> None), 1))
+          in
+          let node = Node (List.map (fun (t, _, _, _) -> t) trees') in
+          (* This is the new node. *)
+          (* For the map and the hint, it will pay to tag the trees' list with integers. *)
+          let trees'' =
+            List.mapi (fun i (a, b, c, d) -> (i, a, b, c, d)) trees'
+          in
+          (* The hint map is just the union of the hints of the children. *)
           let map = function
             | [] -> Some []
-            | n :: rest -> (
+            | n :: rest ->
                 (* The step n will determine which of our children we'll rely on.
-                   The rest will be processed by that child's map.
+                   The rest of the address will be processed by that child's map.
+                   Which, if any, of the hints in trees'' have a value registered for n?
                 *)
-                match (hint_a n, hint_b n) with
-                (* If neither of my children can get to it, neither can I. *)
-                | None, None -> None
-                (* If my left child knows how to get to it, I'll go via left. *)
-                | Some x, None -> Some ((0 :: x) @ Option.get (map_a rest))
-                (* If my right child knows how to get to it, I'll go via right. *)
-                | None, Some x -> Some ((1 :: x) @ Option.get (map_b rest))
-                (* Clashes like this should be impossible. *)
-                | Some _, Some _ -> failwith "Unification error.")
+                let* i, _, hint_i, map_i, _ =
+                  List.find_opt
+                    (fun (_, _, hint, _, _) -> hint n <> None)
+                    trees''
+                in
+                (* If none of my children can get to it, neither can I.
+                   But if my i'th child knows how to get to it, I'll go via that child. *)
+                let* x = hint_i n in
+                (* Now we have the rest of the address, but we need to prepend i. *)
+                Some ((i :: x) @ Option.get (map_i rest))
           in
           (* Add the new node to the priority queue. *)
           let hint n =
@@ -130,21 +145,22 @@ let rec merge_into_one_topo (pq : (t * hint_t * map_t * int) Pifo.t) : t * map_t
                but, since we are growing taller by one level, we need to arbitrate
                _between_ those two children using 0 or 1 as a prefix.
             *)
-            match (hint_a n, hint_b n) with
-            | None, None -> None
-            | Some x, None -> Some (0 :: x)
-            | None, Some x -> Some (1 :: x)
-            | Some _, Some _ -> failwith "Unification error."
+            let* i, _, hint_i, _, _ =
+              List.find_opt (fun (_, _, hint, _, _) -> hint n <> None) trees''
+            in
+            (* If none of my children can get to it, neither can I.
+               But if my i'th child knows how to get to it, I'll go via that child. *)
+            let* x = hint_i n in
+            Some (i :: x)
           in
           (* The height of this tree is clearly one more than its children. *)
           let height = m + 1 in
           (* Add the new node to the priority queue. *)
           let pq'' = Pifo.push pq' (node, hint, map, height) in
           (* Recurse. *)
-          merge_into_one_topo pq''
-      | _ -> failwith "Only d=2 is supported for now.")
+          merge_into_one_topo pq'' d)
 
-let rec build_binary = function
+let rec build_d_ary d = function
   | Star ->
       (* The embedding of a Star is a Star, and the map is the identity for []. *)
       (Star, fun addr -> if addr = [] then Some [] else None)
@@ -154,7 +170,7 @@ let rec build_binary = function
         List.mapi
           (fun i t ->
             (* Get embeddings and maps for the subtrees. *)
-            let t', map = build_binary t in
+            let t', map = build_d_ary d t in
             (* For each child, creat a hints map that just has
                the binding i -> Some []. *)
             let hint addr = if addr = i then Some [] else None in
@@ -168,7 +184,9 @@ let rec build_binary = function
          Shorter is higher-priority.
       *)
       let pq = Pifo.of_list ts' (fun (_, _, _, a) (_, _, _, b) -> a - b) in
-      merge_into_one_topo pq
+      merge_into_one_topo pq d
+
+let build_binary = build_d_ary 2
 
 let rec remove_prefix (prefix : addr_t) (addr : addr_t) =
   (* Maybe this is unduly specific to addresses, but ah well. *)
