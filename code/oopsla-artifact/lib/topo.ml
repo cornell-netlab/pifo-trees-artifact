@@ -93,8 +93,8 @@ let rec merge_into_one_topo pq d : t * map_t =
       let t, _, map, _ = Pifo.top_exn pq in
       (t, map)
   | _ -> (
-      (* Extract up to two trees with minimum height m. *)
-      let trees, pq', m = pop_d_topos pq 2 in
+      (* Extract up to d trees with minimum height m. *)
+      let trees, pq', m = pop_d_topos pq d in
       match trees with
       | [ (topo, hint, map, _) ] ->
           (* There was just one tree with height m.
@@ -143,7 +143,7 @@ let rec merge_into_one_topo pq d : t * map_t =
           let hint n =
             (* The new hint for the node is the union of the children's hints,
                but, since we are growing taller by one level, we need to arbitrate
-               _between_ those two children using 0 or 1 as a prefix.
+               _between_ those d children using 0, 1, ..., d-1 as a prefix.
             *)
             let* i, _, hint_i, _, _ =
               List.find_opt (fun (_, _, hint, _, _) -> hint n <> None) trees''
