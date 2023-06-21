@@ -4,7 +4,7 @@
 
 ## Overview
 
-This is an artifact in support of our [paper][arxiv] _Formal Abstractions for Packet Scheduling_.
+This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) _Formal Abstractions for Packet Scheduling_.
 It implements several key definitions from the paper, and can be used to generate the visualizations that we show towards the end of the paper.
 
 
@@ -43,5 +43,3 @@ To run these tests,
 2. Go into `test/run.ml` and toggle what the target of `let _ = ...` is.
 3. Run `dune test`.
 4. To visualize the results, run `python3 pcaps/plot.py; open *.png`.
-
-[arvix]: https://arxiv.org/abs/2211.11659
