@@ -11,7 +11,7 @@ This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) 
 
 ## Key Definitions
 
-Topo, PIFOTree, and Control, along with straightforward supporting methods such as `flush`, `snap`, `size`, etc. are defined in the files `[topo.ml](lib/topo.ml)`, `pifotree.ml`, and `control.ml`.
+Topo, PIFOTree, and Control, along with straightforward supporting methods such as `flush`, `snap`, `size`, etc. are defined in the files [`topo.ml`](lib/topo.ml), `pifotree.ml`, and `control.ml`.
 Topologies are written by hand (in `topo.ml`) and converted into empty PIFOTrees using a `create` method (in `pifotree.ml`).
 Scheduling transactions are written by hand (in `alg.ml`).
 To see how scheduling transactions may be created and how controls may be generated atop of these, study a simple example such as FCFS under `alg.ml`.
