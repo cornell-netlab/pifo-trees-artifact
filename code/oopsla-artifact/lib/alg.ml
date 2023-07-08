@@ -432,8 +432,8 @@ module ThreePol_Ternary : Alg_t = struct
     Control.simulate end_time 0.001 poprate pkts control
 end
 
-module T2B (TernaryAlg : Alg_t) : Alg_t = struct
-  (* We are given an algorithm of type Alg_t that is runs on a ternary tree.
+module Alg2B (Alg : Alg_t) : Alg_t = struct
+  (* We are given an algorithm of type Alg_t that is runs on a heterogenous tree.
      We will compile it to run on a binary tree.
 
      The following things about the original Alg_t are exposed:
@@ -458,23 +458,179 @@ module T2B (TernaryAlg : Alg_t) : Alg_t = struct
        + a new state: s'
        where pt and s' are gotten by running z s pkt.
   *)
-  let topology, f = Topo.build_binary TernaryAlg.topology
+  let topology, f = Topo.build_binary Alg.topology
   let f_tilde = Topo.lift_tilde f
 
   let z' s pkt =
-    let pt, s' = TernaryAlg.control.z s pkt in
-    (f_tilde TernaryAlg.topology pt, s')
+    let pt, s' = Alg.control.z s pkt in
+    (f_tilde Alg.topology pt, s')
 
   let control : Control.t =
-    { s = TernaryAlg.control.s; q = Pifotree.create topology; z = z' }
+    { s = Alg.control.s; q = Pifotree.create topology; z = z' }
 
   let simulate end_time pkts =
     Control.simulate end_time 0.001 poprate pkts control
 end
 
-module FCFS_Ternary_Bin = T2B (FCFS_Ternary)
-module Strict_Ternary_Bin = T2B (Strict_Ternary)
-module RRobin_Ternary_Bin = T2B (RRobin_Ternary)
-module WFQ_Ternary_Bin = T2B (WFQ_Ternary)
-module TwoPol_Ternary_Bin = T2B (TwoPol_Ternary)
-module ThreePol_Ternary_Bin = T2B (ThreePol_Ternary)
+module FCFS_Ternary_Bin = Alg2B (FCFS_Ternary)
+module Strict_Ternary_Bin = Alg2B (Strict_Ternary)
+module RRobin_Ternary_Bin = Alg2B (RRobin_Ternary)
+module WFQ_Ternary_Bin = Alg2B (WFQ_Ternary)
+module TwoPol_Ternary_Bin = Alg2B (TwoPol_Ternary)
+module ThreePol_Ternary_Bin = Alg2B (ThreePol_Ternary)
+
+(* Extension *)
+
+module ThreePol_Irregular : Alg_t = struct
+  let scheduling_transaction s pkt =
+    let time = Packet.time pkt in
+    let flow = find_flow pkt in
+    (* This is either A, B, C, D, E, F, or G.
+       When computing ranks for the root, we arbitrate between AB, C, D, or EFG.
+       When computing ranks for the left node, we arbitrate between A or B.
+       When computing ranks for the right node, we arbitrate between E,F, or G.
+    *)
+    match flow with
+    | "A" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "AB_weight" s)
+            "AB_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_left_node, s'' =
+          wfq_helper s'
+            (State.lookup "A_weight" s')
+            "A_last_finish" (Packet.len pkt) time
+        in
+        ( [
+            (0, rank_for_root);
+            (0, rank_for_left_node);
+            (0, Rank.create 0.0 time);
+          ],
+          s'' )
+    | "B" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "AB_weight" s)
+            "AB_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_left_node, s'' =
+          wfq_helper s'
+            (State.lookup "B_weight" s')
+            "B_last_finish" (Packet.len pkt) time
+        in
+        ( [
+            (0, rank_for_root);
+            (1, rank_for_left_node);
+            (0, Rank.create 0.0 time);
+          ],
+          s'' )
+    | "C" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "C_weight" s)
+            "C_last_finish" (Packet.len pkt) time
+        in
+        ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "D" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "D_weight" s)
+            "D_last_finish" (Packet.len pkt) time
+        in
+        ([ (2, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    | "E" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "EFG_weight" s)
+            "EFG_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_right_node, s'' =
+          wfq_helper s'
+            (State.lookup "E_weight" s')
+            "E_last_finish" (Packet.len pkt) time
+        in
+        ( [
+            (3, rank_for_root);
+            (0, rank_for_right_node);
+            (0, Rank.create 0.0 time);
+          ],
+          s'' )
+    | "F" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "EFG_weight" s)
+            "EFG_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_right_node, s'' =
+          wfq_helper s'
+            (State.lookup "F_weight" s')
+            "F_last_finish" (Packet.len pkt) time
+        in
+        ( [
+            (3, rank_for_root);
+            (1, rank_for_right_node);
+            (0, Rank.create 0.0 time);
+          ],
+          s'' )
+    | "G" ->
+        let rank_for_root, s' =
+          wfq_helper s
+            (State.lookup "EFG_weight" s)
+            "EFG_last_finish" (Packet.len pkt) time
+        in
+        let rank_for_right_node, s'' =
+          wfq_helper s'
+            (State.lookup "G_weight" s')
+            "G_last_finish" (Packet.len pkt) time
+        in
+        ( [
+            (3, rank_for_root);
+            (2, rank_for_right_node);
+            (0, Rank.create 0.0 time);
+          ],
+          s'' )
+    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+
+  let topology = Topo.irregular2
+
+  let control : Control.t =
+    {
+      s =
+        State.create 20
+        |> State.rebind "AB_weight" 0.2
+        |> State.rebind "A_weight" 0.1
+        |> State.rebind "B_weight" 0.9
+        |> State.rebind "C_weight" 0.3
+        |> State.rebind "D_weight" 0.1
+        |> State.rebind "EFG_weight" 0.4
+        |> State.rebind "E_weight" 0.1
+        |> State.rebind "F_weight" 0.4
+        |> State.rebind "G_weight" 0.5;
+      q = Pifotree.create topology;
+      z = scheduling_transaction;
+    }
+
+  let simulate end_time pkts =
+    Control.simulate end_time 0.001 poprate pkts control
+end
+
+module Alg2T (Alg : Alg_t) : Alg_t = struct
+  (* We are given an algorithm of type Alg_t that is runs on a heterogenous tree.
+     We will compile it to run on a ternary tree.*)
+
+  let topology, f = Topo.build_ternary Alg.topology
+  let f_tilde = Topo.lift_tilde f
+
+  let z' s pkt =
+    let pt, s' = Alg.control.z s pkt in
+    (f_tilde Alg.topology pt, s')
+
+  let control : Control.t =
+    { s = Alg.control.s; q = Pifotree.create topology; z = z' }
+
+  let simulate end_time pkts =
+    Control.simulate end_time 0.001 poprate pkts control
+end
+
+module ThreePol_Irregular_Tern = Alg2T (ThreePol_Irregular)

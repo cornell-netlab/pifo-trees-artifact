@@ -23,7 +23,7 @@ let run simulate_fn flow name =
   in
   Packet.write_to_csv c overdue (Printf.sprintf "../../output%s.csv" name)
 
-let embed_verbose tree addr_list =
+let embed_binary_verbose tree addr_list =
   let compiled_tree, map = Topo.build_binary tree in
   Printf.printf "\n\nThe tree \n\n";
   Topo.print_tree tree;
@@ -32,23 +32,24 @@ let embed_verbose tree addr_list =
   Printf.printf "\nwith the map \n\n";
   Topo.print_map map addr_list
 
-let embedding_only () =
+let embed_binary_only () =
   (* A little evidence for the embedding shown in Figure 3.
      Usage: you supply which tree you want to compile, and supply a list
      (can be empty) of which address queries you want to run on the
      resulting tree.
   *)
   (* Fig 3a *)
-  embed_verbose Topo.one_level_ternary [ []; [ 0 ]; [ 1 ]; [ 2 ] ];
+  embed_binary_verbose Topo.one_level_ternary [ []; [ 0 ]; [ 1 ]; [ 2 ] ];
   (* Fig 3b *)
-  embed_verbose Topo.irregular
+  embed_binary_verbose Topo.irregular
     [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 3; 0 ]; [ 3; 1 ]; [ 3; 2 ] ];
 
   (* A few more, just for fun. *)
-  embed_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
-  embed_verbose Topo.four_wide [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ] ];
-  embed_verbose Topo.two_level_binary [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ] ];
-  embed_verbose Topo.irregular
+  embed_binary_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
+  embed_binary_verbose Topo.four_wide [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ] ];
+  embed_binary_verbose Topo.two_level_binary
+    [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ] ];
+  embed_binary_verbose Topo.irregular
     [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ]; [ 3; 0 ]; [ 3; 1 ]; [ 3; 2 ] ]
 
 let simulate_handwritten () =
@@ -68,6 +69,44 @@ let simulate_binary () =
   run TwoPol_Ternary_Bin.simulate five_flows "twopol_bin";
   run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
 
-let _ = embedding_only ()
-let _ = simulate_handwritten ()
+(* let _ = embed_binary_only () *)
+(* let _ = simulate_handwritten () *)
 (* let _ = simulate_binary () *)
+let extension () =
+  (* We have only really written algorithms against regular ternary topologies
+     and then compiled them to run against regular binary topologies.
+
+     However, the algorithm presented in S6.1 allows us to embed _any_
+     topology into any regular d-ary branching topology.
+
+     Let us walk through how we would write an algorithm against a heterogenous
+     topology and then compile it to run against a regular ternary topology.
+  *)
+  let embed_ternary_verbose tree addr_list =
+    (* Just a verbose printer so we can see what we're doing. *)
+    let compiled_tree, map = Topo.build_ternary tree in
+    Printf.printf "\n\nThe tree \n\n";
+    Topo.print_tree tree;
+    Printf.printf "\nwill embed into the tree \n\n";
+    Topo.print_tree compiled_tree;
+    Printf.printf "\nwith the map \n\n";
+    Topo.print_map map addr_list
+  in
+  embed_ternary_verbose Topo.irregular2
+    (* This is a new topology, an extension of the topology shown in Fig 3b. *)
+    [
+      [];
+      [ 0 ];
+      [ 0; 0 ];
+      [ 0; 1 ];
+      [ 1 ];
+      [ 2 ];
+      [ 3 ];
+      [ 3; 0 ];
+      [ 3; 1 ];
+      [ 3; 2 ];
+    ];
+  run ThreePol_Irregular.simulate seven_flows "extension"
+(* run ThreePol_Irregular_Tern.simulate seven_flows "extension_ternary" *)
+
+let _ = extension ()
