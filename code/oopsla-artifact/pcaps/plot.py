@@ -77,6 +77,11 @@ def plot():
         df = pd.read_csv(f"_build/output{i}.csv")
         make_plot(df, plt, i)
 
+def plot_extension():
+    for i in ["extension", "extension_ternary"]:
+        df = pd.read_csv(f"_build/output{i}.csv")
+        make_plot(df, plt, i)
 
 if __name__ == '__main__':
-    plot()
+    # plot()
+    plot_extension()
