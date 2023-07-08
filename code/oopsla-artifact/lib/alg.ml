@@ -54,8 +54,8 @@ module FCFS_Ternary : Alg_t = struct
       z = scheduling_transaction;
     }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module Strict_Ternary : Alg_t = struct
@@ -82,8 +82,8 @@ module Strict_Ternary : Alg_t = struct
       z = scheduling_transaction;
     }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module RRobin_Ternary : Alg_t = struct
@@ -121,8 +121,8 @@ module RRobin_Ternary : Alg_t = struct
       z = scheduling_transaction;
     }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 let wfq_helper s weight var_last_finish pkt_len time : Rank.t * State.t =
@@ -168,8 +168,8 @@ module WFQ_Ternary : Alg_t = struct
   let control : Control.t =
     { s = init_state; q = Pifotree.create topology; z = scheduling_transaction }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module HPFQ_Binary : Alg_t = struct
@@ -238,8 +238,8 @@ module HPFQ_Binary : Alg_t = struct
       z = scheduling_transaction;
     }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module TwoPol_Ternary : Alg_t = struct
@@ -303,8 +303,8 @@ module TwoPol_Ternary : Alg_t = struct
       z = scheduling_transaction;
     }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module ThreePol_Ternary : Alg_t = struct
@@ -428,8 +428,8 @@ module ThreePol_Ternary : Alg_t = struct
       z = scheduling_transaction;
     }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module Alg2B (Alg : Alg_t) : Alg_t = struct
@@ -468,8 +468,8 @@ module Alg2B (Alg : Alg_t) : Alg_t = struct
   let control : Control.t =
     { s = Alg.control.s; q = Pifotree.create topology; z = z' }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module FCFS_Ternary_Bin = Alg2B (FCFS_Ternary)
@@ -611,8 +611,8 @@ module ThreePol_Irregular : Alg_t = struct
       z = scheduling_transaction;
     }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module Alg2T (Alg : Alg_t) : Alg_t = struct
@@ -629,8 +629,8 @@ module Alg2T (Alg : Alg_t) : Alg_t = struct
   let control : Control.t =
     { s = Alg.control.s; q = Pifotree.create topology; z = z' }
 
-  let simulate end_time pkts =
-    Control.simulate end_time 0.001 poprate pkts control
+  let simulate sim_length pkts =
+    Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module ThreePol_Irregular_Tern = Alg2T (ThreePol_Irregular)
