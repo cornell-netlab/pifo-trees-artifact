@@ -107,13 +107,13 @@ let create_pcap_packets h body : t list =
 
 let pkts_from_file filename =
   let open_file filename =
-    (* Note: this will leak fds and memory *)
     let fd = Unix.(openfile filename [ O_RDONLY ] 0) in
     let ba =
       Bigarray.(
         array1_of_genarray
           (Mmap.V1.map_file fd Bigarray.char c_layout false [| -1 |]))
     in
+    Unix.close fd;
     Cstruct.of_bigarray ba
   in
   let read_header filename =
