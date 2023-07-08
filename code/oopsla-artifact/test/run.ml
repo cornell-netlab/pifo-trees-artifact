@@ -69,7 +69,8 @@ let simulate_binary () =
   run TwoPol_Ternary_Bin.simulate five_flows "twopol_bin";
   run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
 
-(* let _ = embed_binary_only () *)
+let _ = embed_binary_only ()
+
 (* let _ = simulate_handwritten () *)
 (* let _ = simulate_binary () *)
 
@@ -120,4 +121,4 @@ let extension_embed_run () =
 
 (* let _ = extension_embed () *)
 (* let _ = extension_run () *)
-let _ = extension_embed_run ()
+(* let _ = extension_embed_run () *)
