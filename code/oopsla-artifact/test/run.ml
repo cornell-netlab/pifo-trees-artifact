@@ -72,11 +72,17 @@ let simulate_binary () =
 (* let _ = embed_binary_only () *)
 (* let _ = simulate_handwritten () *)
 (* let _ = simulate_binary () *)
-let extension () =
-  (* We have only really written algorithms against regular ternary topologies
+
+(*************)
+(* EXTENSION *)
+(*************)
+let extension_embed () =
+  (* In the paper we have only really written algorithms against
+     _regular ternary_ topologies
      and then compiled them to run against regular binary topologies.
 
-     However, the algorithm presented in S6.1 allows us to embed _any_
+     This is a little timid:
+     The algorithm presented in Section 6.1 allows us to embed _any_
      topology into any regular d-ary branching topology.
 
      Let us walk through how we would write an algorithm against a heterogenous
@@ -105,8 +111,13 @@ let extension () =
       [ 3; 0 ];
       [ 3; 1 ];
       [ 3; 2 ];
-    ];
-  run ThreePol_Irregular.simulate seven_flows "extension"
-(* run ThreePol_Irregular_Tern.simulate seven_flows "extension_ternary" *)
+    ]
 
-let _ = extension ()
+let extension_run () = run ThreePol_Irregular.simulate seven_flows "extension"
+
+let extension_embed_run () =
+  run ThreePol_Irregular_Tern.simulate seven_flows "extension_ternary"
+
+(* let _ = extension_embed () *)
+(* let _ = extension_run () *)
+let _ = extension_embed_run ()

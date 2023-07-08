@@ -479,7 +479,9 @@ module WFQ_Ternary_Bin = Alg2B (WFQ_Ternary)
 module TwoPol_Ternary_Bin = Alg2B (TwoPol_Ternary)
 module ThreePol_Ternary_Bin = Alg2B (ThreePol_Ternary)
 
-(* Extension *)
+(*************)
+(* EXTENSION *)
+(*************)
 
 module ThreePol_Irregular : Alg_t = struct
   let scheduling_transaction s pkt =
@@ -616,8 +618,9 @@ module ThreePol_Irregular : Alg_t = struct
 end
 
 module Alg2T (Alg : Alg_t) : Alg_t = struct
-  (* We are given an algorithm of type Alg_t that is runs on a heterogenous tree.
-     We will compile it to run on a ternary tree.*)
+  (* We are given an algorithm of type Alg_t that runs on a heterogenous tree.
+     We will compile it to run on a ternary tree.
+  *)
 
   let topology, f = Topo.build_ternary Alg.topology
   let f_tilde = Topo.lift_tilde f
