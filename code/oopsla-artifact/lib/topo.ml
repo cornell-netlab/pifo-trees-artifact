@@ -187,6 +187,7 @@ let rec build_d_ary d = function
       merge_into_one_topo pq d
 
 let build_binary = build_d_ary 2
+let build_ternary = build_d_ary 3
 
 let rec remove_prefix (prefix : addr_t) (addr : addr_t) =
   (* Maybe this is unduly specific to addresses, but ah well. *)
@@ -251,4 +252,8 @@ let three_level_ternary =
   Node [ Star; Star; Node [ Star; Star; Node [ Star; Star; Star ] ] ]
 
 let irregular = Node [ Star; Star; Star; Node [ Star; Star; Star ] ]
+
+let irregular2 =
+  Node [ Node [ Star; Star ]; Star; Star; Node [ Star; Star; Star ] ]
+
 let four_wide = Node [ Star; Star; Star; Star ]
