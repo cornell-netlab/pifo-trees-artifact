@@ -12,10 +12,12 @@ This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) 
 
 The first three feautures are in support of the _Functional_ badge, while the last is in support of the _Reusable_ badge.
 
-Installation is simple:
-- Prerequisites: [opam](https://opam.ocaml.org/) 2.1.4, [dune](https://dune.build/) 3.9.0, and [OCaml](https://ocaml.org/releases/5.0.0) 5.0.0.
-- From the home directory, run `opam install . --deps-only` to install our dependencies.
-- Then run `dune build` to build the project.
+Installation is simple thanks to our [package](https://github.com/cornell-netlab/pifo-trees-artifact/pkgs/container/pifo-trees):
+- `docker pull ghcr.io/cornell-netlab/pifo-trees:latest`
+- `docker run -it ghcr.io/cornell-netlab/pifo-trees:latest`
+- Then, in the container, run `dune build` to build the project.
+
+If you prefer to build the project locally, please see the [Dockerfile](Dockerfile) for a recipe.
 
 
 ## Key Definitions
