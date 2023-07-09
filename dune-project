@@ -6,18 +6,18 @@
 
 (package
  (name pifotrees)
- (synopsis "Programmable packet scheduling")
+ (synopsis "Programmable packet scheduling at line rate.")
  (description
-  "Formalizes and extends Sivaraman et. al.'s PIFO Tree model as described in https://arxiv.org/pdf/2211.11659.pdf")
+  "A formalism and implementation of PIFO trees, a recently proposed primitive for packet scheduling. Accompanied by an algorithm to compile a scheduler written to run atop of a PIFO tree of some heterogeous shape into a scheduler that runs on a PIFO tree of some other, regular-branching, shape.")
  (authors
   "Anshuman Mohan"
   "Yunhe Liu"
-  "Tobias Kappé"
+  "Tobias Kapp\195\169"
   "Dexter Kozen"
   "Nate Foster")
  (maintainers "Anshuman Mohan")
  (source
-  (github cornell-netlab/pifo-trees))
+  (github cornell-netlab/pifo-trees-artifact))
  (depends
   (csv
    (>= 2.4))
