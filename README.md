@@ -16,7 +16,9 @@ This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) 
 We provide pointers to the places in the code where key definitions from the paper are implemented.
 1. `Topo` is defined in [`topo.ml`](lib/topo.ml).
 2. `Path` is defined in [`path.ml`](lib/path.ml).
-3. `PIFOTree` is defined in [`pifotree.ml`](lib/pifotree.ml). The same file also contains
+3. `PIFOTree` is defined in [`pifotree.ml`](lib/pifotree.ml).
+
+   The same file also contains:
     - `pop`
     - `push`
     - `size`
