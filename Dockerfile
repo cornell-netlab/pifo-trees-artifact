@@ -16,7 +16,7 @@ WORKDIR pifo-trees-artifact
 # Install dependencies
 RUN opam install . --deps-only
 RUN opam install dune
-RUN sudo apt-get install -y python3 && sudo apt-get install -y python3-pip && sudo apt-get install -y python3-matplotlib && sudo apt-get install -y python3-pandas
+RUN sudo apt-get update && sudo apt-get install -y python3 python3-matplotlib python3-pandas
 
 # Good to have
-RUN sudo apt-get update && sudo apt-get install -y vim && sudo apt-get install -y emacs
+RUN sudo apt-get install -y vim && sudo apt-get install -y emacs
