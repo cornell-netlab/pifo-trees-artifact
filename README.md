@@ -13,7 +13,7 @@ This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) 
 The first three feautures are in support of the _Functional_ badge, while the last is in support of the _Reusable_ badge.
 
 Installation is simple:
-- Prerequisites: [opam](https://opam.ocaml.org/) 2.1.4 and [OCaml 5.0.0](https://ocaml.org/releases/5.0.0).
+- Prerequisites: [opam](https://opam.ocaml.org/) 2.1.4, [dune](https://dune.build/) 3.9.0, and [OCaml](https://ocaml.org/releases/5.0.0) 5.0.0.
 - From the home directory, run `opam install . --deps-only` to install our dependencies.
 - Then run `dune build` to build the project.
 
