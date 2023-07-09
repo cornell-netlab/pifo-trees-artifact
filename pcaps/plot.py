@@ -1,3 +1,4 @@
+import sys
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.patches import Patch
@@ -99,5 +100,7 @@ def plot_extension():
 
 
 if __name__ == "__main__":
-    # plot()
-    plot_extension()
+    if len(sys.argv) > 1 and sys.argv[1] == "--ext":
+        plot_extension()
+    else:
+        plot()
