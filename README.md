@@ -46,7 +46,7 @@ We provide a short Python script that generates toy PCAP files: [`pcap_gen.py`](
 3. `simulate_binary` runs sample PCAPS through the binary schedulers that we have generated automatically.
 
 To run these tests,
-1. Run `opam install . --deps-only` in the directory `oopsla-artifact` to install our dependencies.
+1. Fromt the home directory, run `opam install . --deps-only` to install our dependencies.
 2. Go into [`run.ml`](test/run.ml) and make sure that `let _ = ...` is pointing at `embed_binary_only`.
 3. Run `dune test`. This will pretty-print some sample topologies along with embeddings of these topologies into binary topologies. This is exactly the algorithm that we visualize in Figure 3 and sketch in Section 6.1.
 4. Go into [`run.ml`](test/run.ml) and toggle `let _ = ...` to point to `simulate_handwritten`. This will run PCAPS through a number of handwritten schedulers against ternary topologies. It will save the outputs in temporary files.

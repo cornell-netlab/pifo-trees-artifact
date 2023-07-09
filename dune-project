@@ -6,7 +6,7 @@
 
 (package
  (name pifotrees)
- (synopsis "Programmable packet scheduling at line rate.")
+ (synopsis "Programmable packet scheduling at line rate")
  (description
   "A formalism and implementation of PIFO trees, a recently proposed primitive for packet scheduling. Accompanied by an algorithm to compile a scheduler written to run atop of a PIFO tree of some heterogeous shape into a scheduler that runs on a PIFO tree of some other, regular-branching, shape.")
  (authors
@@ -28,4 +28,6 @@
   (hex
    (>= 1.5.0))
   (mmap
-   (>= 1.2.0))))
+   (>= 1.2.0))
+  (printbox-text
+   (>= 0.6.1))))
