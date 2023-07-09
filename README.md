@@ -13,6 +13,21 @@ This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) 
 
 ## Key Definitions
 
+We provide pointers to the places in the code where key definitions from the paper are implemented.
+1. `Topo` is defined in [`topo.ml`](lib/topo.ml).
+2. `Path` is defined in [`path.ml`](lib/path.ml).
+3. `PIFOTree` is defined in [`pifotree.ml`](lib/pifotree.ml). The same file also contains
+    - `pop`
+    - `push`
+    - `size`
+    - `well_formed`
+    - `snap`
+    - `flush`
+    - `create`, which builds a `PIFOTree` from a `Topo`.
+
+
+
+
 Key items such as `Topo`, `PIFOTree`, and `Control`, along with straightforward supporting methods on these such as `flush`, `snap`, and `size`, are defined in the files [`topo.ml`](lib/topo.ml), [`pifotree.ml`](lib/pifotree.ml), and [`control.ml`](lib/control.ml).
 Topologies are written by hand (in [`topo.ml`](lib/topo.ml)) and converted into empty PIFOTrees using a `create` method (in [`pifotree.ml`](lib/pifotree.ml)).
 Scheduling transactions are written by hand (in [`alg.ml`](lib/alg.ml)).
