@@ -18,3 +18,9 @@ RUN opam install . --deps-only
 
 # Build the project
 RUN opam install dune
+
+# Good to have
+RUN sudo apt-get update && sudo apt-get install -y vim && sudo apt-get install -y emacs
+
+# Install Python 3.11
+RUN sudo apt-get install -y python3 && sudo apt-get install -y python3-pip && sudo apt-get install -y python3-matplotlib && sudo apt-get install -y python3-pandas
