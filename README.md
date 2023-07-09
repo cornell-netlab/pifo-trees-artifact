@@ -35,9 +35,7 @@ First, we introduce the basic constructs from Sections 1 through 4:
     - `flush`
     - `create`, which builds a `PIFOTree` from a `Topo`.
 
-4. `Control` is defined in [`control.ml`](lib/control.ml).
-
-    The same file also contains `sched_t`, which is the type of all scheduling transactions.
+4. `Control` is defined in [`control.ml`](lib/control.ml). The file also contains `sched_t`, which is the type of all scheduling transactions.
 
 5. Scheduling transactions are written by hand (in [`alg.ml`](lib/alg.ml)).
 To see how scheduling transactions may be created and how controls may be generated atop of these, study a simple example such as FCFS in [`alg.ml`](lib/alg.ml).
@@ -47,9 +45,9 @@ To see how scheduling transactions may be created and how controls may be genera
 ### Advanced
 
 Now let us visit the definitions and methods that pertain to the embedding algorithm. These all live in [`topo.ml`](lib/topo.ml). Look out for:
-1. `Addr`.
-2. The homomorphic embedding of one topology into another, written `f : Topo -> Topo` in the paper. In the code it is called `map`.
-3. Given a map `f`, we can lift it to operate over paths, as discussed in Definition 5.8 of the paper. This lifting method is called `lift_tilde` in the code. It creates `f-tilde: Path -> Path`.
+1. `Addr`, which is how we walk down a topology and identify a particular node.
+2. The homomorphic embedding of one topology into another, written `f : Addr -> Addr` in Definition 5.2 of the paper. In the code it is called `map`.
+3. Given a map `f`, we can lift it to operate over paths, as discussed in Definition 5.8 of the paper. This lifting function is called `lift_tilde` in the code. It creates `f-tilde: Path -> Path`.
 
 
 ## Embedding Algorithms
