@@ -11,7 +11,7 @@ let simulate sim_length sleep pop_tick flow t =
 
      We assume that flow is ordered by packet time.
      We start the simulation at the time of the first packet in flow.
-     We simulate until end_sim.
+     We simulate for sim_length seconds.
 
      We need to become sensitive to _time_.
      We cannot just push packets as fast as possible,

@@ -6,15 +6,17 @@
 
 This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) _Formal Abstractions for Packet Scheduling_.
 1. It implements several key definitions from the paper.
-2. It implements the embedding algorithm visualized in Figure 3 and described in Theorem 6.1.
+2. It implements the embedding algorithm described in Theorem 6.1, and shows how to lift this embedding to operate on schedulers.
 3. It generates the visualizations that we show in Section 7.
 4. It can be extended to write a new, possibly heterogenous (i.e., _not_ necessarily regular d-ary branching) topology, write a new scheduler against that topology, and compile that scheduler to instead run against an automatically generated regular-branching d-ary topology.
+
+The first three feautures are in support of the _Functional_ badge, while the last is in support of the _Reusable_ badge.
 
 
 ## Key Definitions
 
-We provide pointers to the places in the code where key definitions from the paper are implemented.
-1. `Topo` is defined in [`topo.ml`](lib/topo.ml).
+First, we introduce the basic constructs from Sections 1 through 4:
+1. `Topo` is defined in [`topo.ml`](lib/topo.ml). The file also contains a few handwritten topologies.
 2. `Path` is defined in [`path.ml`](lib/path.ml).
 3. `PIFOTree` is defined in [`pifotree.ml`](lib/pifotree.ml).
 
@@ -27,31 +29,45 @@ We provide pointers to the places in the code where key definitions from the pap
     - `flush`
     - `create`, which builds a `PIFOTree` from a `Topo`.
 
+4. `Control` is defined in [`control.ml`](lib/control.ml).
+
+    The same file also contains `sched_t`, which is the type of all scheduling transactions.
 
 
+Now let us visit the definitions and methods that pertain to the embedding algorithm. These all live in [`topo.ml`](lib/topo.ml). Look out for:
+1. `Addr`.
+2. The homomorphic embedding of one topology into another, written `f : Topo -> Topo` in the paper. In the code it is called `map`.
+3. Given a map `f`, we can lift it to operate over paths, as discussed in Definition 5.8 of the paper. This lifting method is called `lift_tilde` in the code. It creates `f-tilde: Path -> Path`.
 
-Key items such as `Topo`, `PIFOTree`, and `Control`, along with straightforward supporting methods on these such as `flush`, `snap`, and `size`, are defined in the files [`topo.ml`](lib/topo.ml), [`pifotree.ml`](lib/pifotree.ml), and [`control.ml`](lib/control.ml).
-Topologies are written by hand (in [`topo.ml`](lib/topo.ml)) and converted into empty PIFOTrees using a `create` method (in [`pifotree.ml`](lib/pifotree.ml)).
-Scheduling transactions are written by hand (in [`alg.ml`](lib/alg.ml)).
-To see how scheduling transactions may be created and how controls may be generated atop of these, study a simple example such as FCFS in [`alg.ml`](lib/alg.ml).
 
+## Embedding Algorithms
 
-## Embedding Algorithm
+### Embedding Topologies
 
-One of the contributions of the paper is an embedding algorithm that takes us one from one topology to another.
-That is implemented as `build_d_ary` in [`topo.ml`](lib/topo.ml), and we primarily instantiate it with `d=2` to get `build_binary`. In the extenion (see below) we instantiate it with `d=3`.
+One of the contributions of the paper is an embedding algorithm that safely takes us one from one topology to another.
+That is implemented as `build_d_ary` in [`topo.ml`](lib/topo.ml).
 
 This function takes a source topology, which may be heterogenous, and returns two things:
 1. The target topology, which is a regular-branching d-ary topology (for the chosen `d`).
 2. The embedding map `f` from the source topology to the target topology.
 
-The same file also has `lift_tilde`, which lifts an embedding map `f : Topo.t -> Topo.t` to instead operate over paths, i.e., `f-tilde: Path.t -> Path.t`.
-
-To see how these can be orchestrated to convert _schedulers_ written against heterogenous topologies into _schedulers_ running against binary topologies, study the functor `Alg2B` in [`alg.ml`](lib/alg.ml).
+It is implemented as described in Theorem 6.1 of the paper.
 
 
+### Compiling Schedulers
 
-## Visualizations (for the "functional" badge)
+Next, to see how the above can be orchestrated to convert _schedulers_ written against heterogenous topologies into _schedulers_ running against d-ary topologies, study the functors `Alg2B` (where `d=2`) and `Alg2T` (where `d=3`) in [`alg.ml`](lib/alg.ml). These proceed as described in Theorem 5.10 of the paper.
+
+
+
+
+## Visualizations
+
+Scheduling transactions are written by hand (in [`alg.ml`](lib/alg.ml)).
+To see how scheduling transactions may be created and how controls may be generated atop of these, study a simple example such as FCFS in [`alg.ml`](lib/alg.ml).
+
+`simulate`, which runs a given list of packets through a given control. Note that this is different from the relation _simulation_ defined in the paper, which is a formal statement about one PIFO tree being able to mimic the behavios or another.
+
 
 [`run.ml`](test/run.ml) contains a few scripts of interest:
 1. `embed_binary_only` runs the embedding algorithm over a few sample topologies and pretty-prints the answers.
