@@ -78,7 +78,9 @@ We will be visiting the file [`run.ml`](test/run.ml) and toggling the `let _ =` 
 1. Visit [`run.ml`](test/run.ml) and make sure that `let _ = ...` is pointing at `embed_binary_only`.
 2. Run `dune test`. This will pretty-print some sample non-binary topologies along with automatically generated embeddings of these topologies into binary. The pretty-printer requires a list of paths that you are interested in tracking through the embedding; see the existing code for examples.
 
-This is exactly the algorithm that we visualize in Figure 3 and sketch in Theorem 6.1.
+This is exactly the algorithm that we sketch in Theorem 6.1.
+The first topology that we embed is the same as Fig 3a in the paper, and the second is the same as Fig 3b.
+
 
 ### Running Handwritten Schedulers, Compiled Schedulers, and Visualizing the Results
 
@@ -88,6 +90,7 @@ This is exactly the algorithm that we visualize in Figure 3 and sketch in Theore
 4. Run `dune test`. This will run the same PCAPS through automatically generated versions of the above schedulers, now running against automatically generated binary topologies. Again, it will save these outputs in temporary files, which you can again ignore.
 5. Now run `python3 pcaps/plot.py; open *.png`. This will access our temporary files and run them through our visualizer. The PNG files generated are exactly as shown in tables 1, 2, and 3 of the paper. Note that, for all `alg_name`, `alg_name.png` and `alg_name_bin.png` look the same; this is exactly the point of our compilation algorithm: we have moved automatically to an entirely new (binary) topology, but have observed no appreciable loss in performance or change in behavior.
 
+There is no second version of HPFQ, as it is already a binary scheduler. The point of this visualization is to show a scheduling algorithm that could not have been achieved without a hierarchical PIFO tree. It is impossible to implement this scheduler using a PIFO or using a flat ternary PIFO tree: tall skinny trees are more expressive than short fat trees.
 
 ## Extension
 
@@ -101,4 +104,4 @@ Let us walk through how we would write a scheduler against a heterogenous topolo
 4. To visualize the results of running a PCAP through this scheduler, visit [`run.ml`](test/run.ml), toggle `let _ =` to point to `extension_run`, and then run `dune test`. The results will to to temporary files, which you can ignore.
 5. Now we'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml). This functor takes a scheduler against a heterogenous topology and returns a scheduler against a regular-branching ternary topology. To see this in action, visit [`run.ml`](test/run.ml), toggle `let _ =` to point to `extension_embed_run`, and run `dune test`.
 6. To visualize the results, run `python3 pcaps/plot.py; open extension*.png`. The two results should be identical.
-7. We have, so far, used synthetically generated PCAPs to test our schedulers. The scripts we use to generate these are in [`pcap_gen.py`](pcaps/pcap_gen.py), and users are encouraged to modify this script to generate their own PCAPs.
+7. We have, so far, used synthetically generated PCAPs to test our schedulers. The scripts we use to generate these are in [`pcap_gen.py`](pcaps/pcap_gen.py), and users can modify this script to generate their own PCAPs.

@@ -70,7 +70,6 @@ let simulate_binary () =
   run ThreePol_Ternary_Bin.simulate seven_flows "threepol_bin"
 
 let _ = embed_binary_only ()
-
 (* let _ = simulate_handwritten () *)
 (* let _ = simulate_binary () *)
 
