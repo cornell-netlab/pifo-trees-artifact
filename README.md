@@ -15,6 +15,8 @@ The first three feautures are in support of the _Functional_ badge, while the la
 
 ## Key Definitions
 
+### Basic
+
 First, we introduce the basic constructs from Sections 1 through 4:
 1. `Topo` is defined in [`topo.ml`](lib/topo.ml). The file also contains a few handwritten topologies.
 2. `Path` is defined in [`path.ml`](lib/path.ml).
@@ -33,6 +35,7 @@ First, we introduce the basic constructs from Sections 1 through 4:
 
     The same file also contains `sched_t`, which is the type of all scheduling transactions.
 
+### Advanced
 
 Now let us visit the definitions and methods that pertain to the embedding algorithm. These all live in [`topo.ml`](lib/topo.ml). Look out for:
 1. `Addr`.
