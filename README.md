@@ -13,11 +13,11 @@ This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) 
 The first three feautures are in support of the _Functional_ badge, while the last is in support of the _Reusable_ badge.
 
 Installation is simple thanks to our [package](https://github.com/cornell-netlab/pifo-trees-artifact/pkgs/container/pifo-trees):
-- `docker pull ghcr.io/cornell-netlab/pifo-trees:latest`
-- `docker run -it ghcr.io/cornell-netlab/pifo-trees:latest`
-- Then, in the container, run `dune build` to build the project.
+1. `docker pull ghcr.io/cornell-netlab/pifo-trees:latest`
+2. `docker run -it --rm ghcr.io/cornell-netlab/pifo-trees:latest`
+3. Then, in the container, run `dune build` to build the project.
 
-If you prefer to build the project locally, please see the [Dockerfile](Dockerfile) for a recipe.
+If you prefer to build the project locally, please see the [Dockerfile](Dockerfile) for a recipe. You will still need to run `dune build` to build the project.
 
 
 ## Key Definitions
