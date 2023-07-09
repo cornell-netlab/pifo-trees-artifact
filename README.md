@@ -102,6 +102,4 @@ Let us walk through how we would write a scheduler against a heterogenous topolo
 4. To visualize the results of running a PCAP through this scheduler, visit [`run.ml`](test/run.ml), toggle `let _ =` to point to `extension_run`, and then run `dune test`. The results will to to temporary files, which you can ignore.
 5. Now we'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml). This functor takes a scheduler against a heterogenous topology and returns a scheduler against a regular-branching ternary topology. To see this in action, visit [`run.ml`](test/run.ml), toggle `let _ =` to point to `extension_embed_run`, and run `dune test`.
 6. To visualize the results, run `python3 pcaps/plot.py; open extension*.png`. The two results should be identical.
-
-We have, so far, used synthetically generated PCAPs to test our schedulers.
-The scripts we use to generate these are in [`pcap_gen.py`](pcaps/pcap_gen.py), and users are encouraged to modify this script to generate their own PCAPs.
+7. We have, so far, used synthetically generated PCAPs to test our schedulers. The scripts we use to generate these are in [`pcap_gen.py`](pcaps/pcap_gen.py), and users are encouraged to modify this script to generate their own PCAPs.
