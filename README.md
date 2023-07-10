@@ -90,22 +90,27 @@ We will be visiting the file [`run.ml`](test/run.ml) and toggling the `let _ =` 
 
 ### Visualizing Embeddings over Topologies
 
-1. Visit [`run.ml`](test/run.ml) and make sure that `let _ = ...` is pointing at `embed_binary_only`.
-2. Run `dune test`. This will pretty-print some sample non-binary topologies along with automatically generated embeddings of these topologies into binary. The pretty-printer requires a list of paths that you are interested in tracking through the embedding; see the existing code for examples.
+1. Run `dune test`. This will pretty-print some sample non-binary topologies along with automatically generated embeddings of these topologies into binary form.
 
 This is exactly the algorithm that we sketch in Theorem 6.1.
-The first topology that we embed is the same as Fig 3a in the paper, and the second is the same as Fig 3b.
+The first topology that we pretty-print is the same as Fig 3a in the paper, and the second is the same as Fig 3b.
 
 
 ### Running Handwritten Schedulers, Compiled Schedulers, and Visualizing the Results
 
-1. Visit [`run.ml`](test/run.ml) and toggle `let _ = ...` to point to `simulate_handwritten`.
-2. Run `dune test`. This will run PCAPS through a number of handwritten schedulers against handwritten ternary topologies. It will save the outputs in temporary files; you can ignore this for now.
-3. Visit [`run.ml`](test/run.ml) and toggle `let _ = ...` to point to `simulate_binary`.
-4. Run `dune test`. This will run the same PCAPS through automatically generated versions of the above schedulers, now running against automatically generated binary topologies. Again, it will save these outputs in temporary files, which you can again ignore.
-5. Now run `python3 pcaps/plot.py`. This will access our temporary files and run them through our visualizer. See the [mini-guide](extra.md) for how to copy these PNG files out of the Docker container. The PNG files generated are exactly as shown in tables 1, 2, and 3 of the paper. Note that, for all `alg_name`, the files `alg_name.png` and `alg_name_bin.png` look the same; this is exactly the point of our compilation algorithm: we have moved automatically to an entirely new (binary) topology, but have observed no appreciable loss in performance or change in behavior.
+Running `dune test` above has already run a few simulations for us.
+In particular:
+1. It has run a number of PCAPS through a number of handwritten schedulers against handwritten ternary topologies. It has saved the results as CSV files, which we can ignore for now.
+2. It has also run the same PCAPS through automatically generated versions of the above schedulers, now running against automatically generated _binary_ topologies. Again, it has saved the results as CSV files, which we can ignore for now.
 
-There is no second version of HPFQ, as it is already a binary scheduler. The point of this visualization is to show a scheduling algorithm that could not have been achieved without a hierarchical PIFO tree. It is impossible to implement this scheduler using a PIFO or using a flat ternary PIFO tree: tall skinny trees are more expressive than short fat trees.
+To visualize the results, run `python3 pcaps/plot.py`.
+
+This will access our temporary files and run them through our visualizer. See the [mini-guide](extra.md) for how to copy these PNG files out of the Docker container. The PNG files generated are exactly as shown in tables 1, 2, and 3 of the paper, and are named `alg_name.png` or `alg_name_bin.png` depending on whether they were generated against a handwritten topology or a binary topology.
+
+Note that, for all `alg_name`, the files `alg_name.png` and `alg_name_bin.png` look the same; this is exactly the point of our compilation algorithm: we have moved automatically to an entirely new (binary) topology, but have observed no appreciable loss in performance or change in behavior.
+
+Note also that there is no second version of HPFQ, as it is already a binary scheduler. The point of this visualization is to show a scheduling algorithm that could not have been achieved without a hierarchical PIFO tree. It is impossible to implement this scheduler using a PIFO or using a flat ternary PIFO tree: tall skinny trees are more expressive than short fat trees.
+
 
 ## Extension
 
@@ -113,7 +118,10 @@ So far we have only really written schedulers against _regular-branching ternary
 This is a little timid: the algorithm presented in Theorem 6.1 allows us to embed _any_ topology into any regular-branching d-ary topology.
 Let us walk through how we would write a scheduler against a heterogenous topology and then compile it to run against a regular-branching ternary topology.
 
-1. The file [`alg.ml`](lib/alg.ml) has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks. Before working on the extension, we recommend a look through this file until the comment marked EXTENSION.
+1. The file [`alg.ml`](lib/alg.ml) has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks. Before working on the extension, we recommend a look through the simpler examples in that file. Consider modifying a few weights and re-running `dune test; python3 pcaps/plot.py` to see how the results change.
+
+AM: Under construction, need to talk to Nate.
+
 2. We will use the topology `irregular2` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into a ternary tree, go to [`run.ml`](test/run.ml) and toggle `let _ =` to point to `extension_embed`. Run `dune test`.
 3. Now let's write a new scheduler against this heterogenous topology. Visit [`alg.ml`](lib/alg.ml) and find `module ThreePol_Irregular`. We have already provided a sketch of a scheduler, essentially doing WFQ sharing at three different nodes. Feel free to modify the weights if you wish; this is done by changing the state variables.
 4. To visualize the results of running a PCAP through this scheduler, visit [`run.ml`](test/run.ml), toggle `let _ =` to point to `extension_run`, and then run `dune test`. The results will to to temporary files, which you can ignore.

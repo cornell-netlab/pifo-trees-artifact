@@ -1,3 +1,9 @@
 (tests
- (names run)
+ (names
+  embed_binary
+  simulate_handwritten
+  simulate_binary
+  embed_extension
+  simulate_extension_handwritten
+  simulate_extension_ternary)
  (libraries pifotrees_lib))
