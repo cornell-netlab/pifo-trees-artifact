@@ -135,7 +135,7 @@ This was a simple modification of the FCFS scheduler `FCFS_Ternary` from earlier
 3. Following this lead, can you now write a scheduler that performs WFQ scheduling? It should be similar to the scheduler `WFQ_Ternary` from earlier in the file. Copy the code from that module over, and make some small changes:
     - You must send flow D to leaf 3.
     - You must register some weight for flow D in the state.
-    - You must change to topoplogy to `Topo.flat_four`.
+    - You must change to topology to `Topo.flat_four`.
 4. Now we'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml), which closely resembers `Alg2B` from earlier in the file.
 5. To run these schedulers against a PCAP, run `dune test`. To visualize the results, run `python3 pcaps/plot.py --ext`.
 The generated files will be called `extension.png` and `extension_ternary.png`.
