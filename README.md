@@ -104,7 +104,7 @@ In particular:
 
 To visualize the results, run `python3 pcaps/plot.py`.
 
-This will access our temporary files and run them through our visualizer. See the [mini-guide](extra.md) for how to copy these PNG files out of the Docker container. The PNG files generated are exactly as shown in tables 1, 2, and 3 of the paper, and are named `alg_name.png` or `alg_name_bin.png` depending on whether they were generated against a handwritten topology or a binary topology.
+This will access our temporary files and run them through our visualizer, generating a number of PNG files. See the [mini-guide](extra.md) for how to copy these PNG files out of the Docker container. The PNG files generated are exactly as shown in tables 1, 2, and 3 of the paper, and are named `alg_name.png` or `alg_name_bin.png` depending on whether they were generated against a handwritten topology or a binary topology.
 
 Note that, for all `alg_name`, the files `alg_name.png` and `alg_name_bin.png` look the same; this is exactly the point of our compilation algorithm: we have moved automatically to an entirely new (binary) topology, but have observed no appreciable loss in performance or change in behavior.
 
