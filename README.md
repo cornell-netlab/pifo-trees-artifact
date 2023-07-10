@@ -86,7 +86,6 @@ Next, to see how the above can be orchestrated to convert _schedulers_ written a
 
 ## Visualizations
 
-We will be visiting the file [`run.ml`](test/run.ml) and toggling the `let _ =` to point to different functions.
 
 ### Visualizing Embeddings over Topologies
 
@@ -120,7 +119,7 @@ Let us walk through how we would write a scheduler against a heterogenous topolo
 
 1. The file [`alg.ml`](lib/alg.ml) has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks. Before working on the extension, we recommend a look through the simpler examples in that file. Consider modifying a few weights and re-running `dune test; python3 pcaps/plot.py` to see how the results change.
 
-AM: Under construction, need to talk to Nate.
+_AM: Under construction, need to talk to Nate. The below is outdated._
 
 2. We will use the topology `irregular2` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into a ternary tree, go to [`run.ml`](test/run.ml) and toggle `let _ =` to point to `extension_embed`. Run `dune test`.
 3. Now let's write a new scheduler against this heterogenous topology. Visit [`alg.ml`](lib/alg.ml) and find `module ThreePol_Irregular`. We have already provided a sketch of a scheduler, essentially doing WFQ sharing at three different nodes. Feel free to modify the weights if you wish; this is done by changing the state variables.
