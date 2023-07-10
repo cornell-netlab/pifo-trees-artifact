@@ -17,7 +17,7 @@ Installation is straightforward if you use our [package](https://github.com/corn
     - OCaml, version 5.0.0 or higher
     - Dune, version 3.8.2 or higher
     - Python, version 3.11.3 or higher
-    - Python libraries matplotlib and pandas
+    - Python libraries matplotlib, pandas, and scapy.
 2. Clone this repository and `cd` into it.
 3. Run `opam install . --deps-only` to install further OCaml dependencies.
 4. Run `dune build` to build the project.
@@ -89,7 +89,7 @@ Next, to see how the above can be orchestrated to convert _schedulers_ written a
 
 ### Visualizing Embeddings over Topologies
 
-1. Run `dune test`. This will pretty-print some sample non-binary topologies along with automatically generated embeddings of these topologies into binary form.
+Run `dune test`. This will pretty-print some sample non-binary topologies along with automatically generated embeddings of these topologies into binary form.
 
 This is exactly the algorithm that we sketch in Theorem 6.1.
 The first topology that we pretty-print is the same as Fig 3a in the paper, and the second is the same as Fig 3b.
@@ -115,7 +115,7 @@ Note also that there is no second version of HPFQ, as it is already a binary sch
 
 How would you go about writing your own scheduler?
 Let us walk through a simple example.
-We will:
+You will:
 1. Examine a flat 4-ary topology and see how it would be compiled into ternary form.
 2. Study a simple scheduler that runs against this flat 4-ary topology.
 3. Write your own scheduler against this flat 4-ary topology.
