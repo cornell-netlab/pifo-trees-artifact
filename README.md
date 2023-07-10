@@ -1,6 +1,27 @@
 
 # Formal Abstractions for Packet Scheduling
 
+## Installation
+
+### In the Docker Container
+
+Installation is straightforward if you use our [package](https://github.com/cornell-netlab/pifo-trees-artifact/pkgs/container/pifo-trees):
+1. `docker pull ghcr.io/cornell-netlab/pifo-trees:latest`
+2. `docker run -it --rm ghcr.io/cornell-netlab/pifo-trees:latest`
+3. Then, in the container, run `dune build` to build the project.
+
+### To Build Locally
+
+1. Install our prerequisites:
+    - opam, version 2.1.4 or higher
+    - OCaml, version 5.0.0 or higher
+    - Dune, version 3.8.2 or higher
+    - Python, version 3.11.3 or higher
+    - Python libraries matplotlib and pandas
+2. Clone this repository and `cd` into it.
+3. Run `opam install . --deps-only` to install further OCaml dependencies.
+4. Run `dune build` to build the project.
+
 
 ## Overview
 
@@ -11,14 +32,6 @@ This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) 
 4. It can be extended to write a new, possibly heterogenous (i.e., _not_ necessarily regular d-ary branching) topology, write a new scheduler against that topology, and compile that scheduler to instead run against an automatically generated regular-branching d-ary topology.
 
 The first three feautures are in support of the _Functional_ badge, while the last is in support of the _Reusable_ badge.
-
-Installation is simple thanks to our [package](https://github.com/cornell-netlab/pifo-trees-artifact/pkgs/container/pifo-trees):
-1. `docker pull ghcr.io/cornell-netlab/pifo-trees:latest`
-2. `docker run -it --rm ghcr.io/cornell-netlab/pifo-trees:latest`
-3. Then, in the container, run `dune build` to build the project.
-
-If you prefer to build the project locally, please see the [Dockerfile](Dockerfile) for a recipe. You will still need to run `dune build` to build the project.
-
 
 ## Key Definitions
 
