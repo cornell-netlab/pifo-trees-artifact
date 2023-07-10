@@ -23,7 +23,7 @@ let embed_binary_only () =
 
   (* A few more, just for fun. *)
   embed_binary_verbose Topo.one_level_binary [ []; [ 0 ]; [ 1 ] ];
-  embed_binary_verbose Topo.four_wide [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ] ];
+  embed_binary_verbose Topo.flat_four [ []; [ 0 ]; [ 1 ]; [ 2 ]; [ 3 ] ];
   embed_binary_verbose Topo.two_level_binary
     [ []; [ 0 ]; [ 1 ]; [ 0; 0 ]; [ 0; 1 ] ];
   embed_binary_verbose Topo.irregular

@@ -483,135 +483,40 @@ module ThreePol_Ternary_Bin = Alg2B (ThreePol_Ternary)
 (* EXTENSION *)
 (*************)
 
-module ThreePol_Irregular : Alg_t = struct
+module WFQ_Flat_Four : Alg_t = struct
   let scheduling_transaction s pkt =
     let time = Packet.time pkt in
     let flow = find_flow pkt in
-    (* This is either A, B, C, D, E, F, or G.
-       When computing ranks for the root, we arbitrate between AB, C, D, or EFG.
-       When computing ranks for the left node, we arbitrate between A or B.
-       When computing ranks for the right node, we arbitrate between E,F, or G.
-    *)
-    match flow with
-    | "A" ->
-        let rank_for_root, s' =
-          wfq_helper s
-            (State.lookup "AB_weight" s)
-            "AB_last_finish" (Packet.len pkt) time
-        in
-        let rank_for_left_node, s'' =
-          wfq_helper s'
-            (State.lookup "A_weight" s')
-            "A_last_finish" (Packet.len pkt) time
-        in
-        ( [
-            (0, rank_for_root);
-            (0, rank_for_left_node);
-            (0, Rank.create 0.0 time);
-          ],
-          s'' )
-    | "B" ->
-        let rank_for_root, s' =
-          wfq_helper s
-            (State.lookup "AB_weight" s)
-            "AB_last_finish" (Packet.len pkt) time
-        in
-        let rank_for_left_node, s'' =
-          wfq_helper s'
-            (State.lookup "B_weight" s')
-            "B_last_finish" (Packet.len pkt) time
-        in
-        ( [
-            (0, rank_for_root);
-            (1, rank_for_left_node);
-            (0, Rank.create 0.0 time);
-          ],
-          s'' )
-    | "C" ->
-        let rank_for_root, s' =
-          wfq_helper s
-            (State.lookup "C_weight" s)
-            "C_last_finish" (Packet.len pkt) time
-        in
-        ([ (1, rank_for_root); (0, Rank.create 0.0 time) ], s')
-    | "D" ->
-        let rank_for_root, s' =
-          wfq_helper s
-            (State.lookup "D_weight" s)
-            "D_last_finish" (Packet.len pkt) time
-        in
-        ([ (2, rank_for_root); (0, Rank.create 0.0 time) ], s')
-    | "E" ->
-        let rank_for_root, s' =
-          wfq_helper s
-            (State.lookup "EFG_weight" s)
-            "EFG_last_finish" (Packet.len pkt) time
-        in
-        let rank_for_right_node, s'' =
-          wfq_helper s'
-            (State.lookup "E_weight" s')
-            "E_last_finish" (Packet.len pkt) time
-        in
-        ( [
-            (3, rank_for_root);
-            (0, rank_for_right_node);
-            (0, Rank.create 0.0 time);
-          ],
-          s'' )
-    | "F" ->
-        let rank_for_root, s' =
-          wfq_helper s
-            (State.lookup "EFG_weight" s)
-            "EFG_last_finish" (Packet.len pkt) time
-        in
-        let rank_for_right_node, s'' =
-          wfq_helper s'
-            (State.lookup "F_weight" s')
-            "F_last_finish" (Packet.len pkt) time
-        in
-        ( [
-            (3, rank_for_root);
-            (1, rank_for_right_node);
-            (0, Rank.create 0.0 time);
-          ],
-          s'' )
-    | "G" ->
-        let rank_for_root, s' =
-          wfq_helper s
-            (State.lookup "EFG_weight" s)
-            "EFG_last_finish" (Packet.len pkt) time
-        in
-        let rank_for_right_node, s'' =
-          wfq_helper s'
-            (State.lookup "G_weight" s')
-            "G_last_finish" (Packet.len pkt) time
-        in
-        ( [
-            (3, rank_for_root);
-            (2, rank_for_right_node);
-            (0, Rank.create 0.0 time);
-          ],
-          s'' )
-    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+    let var_last_finish = Printf.sprintf "%s_last_finish" flow in
+    let var_weight = Printf.sprintf "%s_weight" flow in
+    let weight = State.lookup var_weight s in
+    let rank_for_root, s' =
+      wfq_helper s weight var_last_finish (Packet.len pkt) time
+    in
+    let int_for_root =
+      (* Put flow A into leaf 0, flow B into leaf 1,
+         flow C into leaf 2, and flow D into leaf 3.
+      *)
+      match flow with
+      | "A" -> 0
+      | "B" -> 1
+      | "C" -> 2
+      | "D" -> 3
+      | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
+    in
+    ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s')
 
-  let topology = Topo.irregular2
+  let topology = Topo.flat_four
+
+  let init_state =
+    State.create 8
+    |> State.rebind "A_weight" 0.1
+    |> State.rebind "B_weight" 0.2
+    |> State.rebind "C_weight" 0.3
+    |> State.rebind "D_weight" 0.4
 
   let control : Control.t =
-    {
-      s =
-        State.create 20
-        |> State.rebind "AB_weight" 0.2
-        |> State.rebind "A_weight" 0.1
-        |> State.rebind "B_weight" 0.9
-        |> State.rebind "C_weight" 0.3
-        |> State.rebind "D_weight" 0.1
-        |> State.rebind "EFG_weight" 0.4
-        |> State.rebind "E_weight" 0.1
-        |> State.rebind "F_weight" 0.4
-        |> State.rebind "G_weight" 0.5;
-      q = Pifotree.create topology;
-      z = scheduling_transaction;
-    }
+    { s = init_state; q = Pifotree.create topology; z = scheduling_transaction }
 
   let simulate sim_length pkts =
     Control.simulate sim_length 0.001 poprate pkts control
@@ -620,9 +525,13 @@ end
 module Alg2T (Alg : Alg_t) : Alg_t = struct
   (* We are given an algorithm of type Alg_t that runs on a heterogenous tree.
      We will compile it to run on a ternary tree.
+     The process is really very similar to Alg2B above.
   *)
 
   let topology, f = Topo.build_ternary Alg.topology
+  (*                ^^^^^^^^^^^^^^^^^^
+                     The only change!
+  *)
   let f_tilde = Topo.lift_tilde f
 
   let z' s pkt =
@@ -636,4 +545,4 @@ module Alg2T (Alg : Alg_t) : Alg_t = struct
     Control.simulate sim_length 0.001 poprate pkts control
 end
 
-module ThreePol_Irregular_Tern = Alg2T (ThreePol_Irregular)
+module WFQ_Flat_Four_Ternary = Alg2T (WFQ_Flat_Four)

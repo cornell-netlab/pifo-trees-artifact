@@ -15,5 +15,4 @@ val two_level_binary : t
 val two_level_ternary : t
 val three_level_ternary : t
 val irregular : t
-val irregular2 : t
-val four_wide : t
+val flat_four : t

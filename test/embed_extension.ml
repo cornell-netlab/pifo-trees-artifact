@@ -15,26 +15,22 @@ let extension_embed () =
   let embed_ternary_verbose tree addr_list =
     (* Just a verbose printer so we can see what we're doing. *)
     let compiled_tree, map = Topo.build_ternary tree in
-    Printf.printf "\n\nThe tree \n\n";
+    (* Note that we have embedded into a ternary tree. *)
+    Printf.printf "\n\nEXTENSION\n\nThe tree \n\n";
     Topo.print_tree tree;
     Printf.printf "\nwill embed into the ternary tree \n\n";
     Topo.print_tree compiled_tree;
     Printf.printf "\nwith the map \n\n";
-    Topo.print_map map addr_list
+    Topo.print_map map addr_list;
+    Printf.printf "\nEND EXTENSION\n\n"
   in
-  embed_ternary_verbose Topo.irregular2
-    (* This is a new topology, an extension of the topology shown in Fig 3b. *)
+  embed_ternary_verbose Topo.flat_four
     [
       [];
       [ 0 ];
-      [ 0; 0 ];
-      [ 0; 1 ];
       [ 1 ];
       [ 2 ];
       [ 3 ];
-      [ 3; 0 ];
-      [ 3; 1 ];
-      [ 3; 2 ];
     ]
 
 let _ = extension_embed ()

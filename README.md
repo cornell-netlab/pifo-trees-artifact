@@ -113,19 +113,26 @@ Note also that there is no second version of HPFQ, as it is already a binary sch
 
 ## Extension
 
-So far we have only really written schedulers against _regular-branching ternary_ topologies and then compiled them to run against regular-branching binary topologies.
-This is a little timid: the algorithm presented in Theorem 6.1 allows us to embed _any_ topology into any regular-branching d-ary topology.
-Let us walk through how we would write a scheduler against a heterogenous topology and then compile it to run against a regular-branching ternary topology.
+How would you go about writing your own scheduler?
+Let us walk through a simple example.
+We will:
+1. Examine a flat 4-ary topology and see how it would be compiled into ternary form.
+2. Write a scheduler against this flat 4-ary topology.
+3. Examine a functor that compiles schedulers against flat 4-ary topologies into schedulers against ternary topologies.
+4. Run a PCAP through the handwritten scheduler and the compiled scheduler, and visualize the results.
 
-1. The file [`alg.ml`](lib/alg.ml) has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks. Before working on the extension, we recommend a look through the simpler examples in that file. Consider modifying a few weights and re-running `dune test; python3 pcaps/plot.py` to see how the results change.
+Before starting, we recommend a look through the file [`alg.ml`](lib/alg.ml).
+It has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks.
+Consider modifying a few things (e.g., in `Strict_Ternary`, change the order of strict priority; in `WFQ_Ternary`, change the weights) and re-running `dune test; python3 pcaps/plot.py` to see how the results change.
 
-_AM: Under construction, need to talk to Nate. The below is outdated._
 
-2. We will use the topology `irregular2` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into a ternary tree, go to [`run.ml`](test/run.ml) and toggle `let _ =` to point to `extension_embed`. Run `dune test`.
-3. Now let's write a new scheduler against this heterogenous topology. Visit [`alg.ml`](lib/alg.ml) and find `module ThreePol_Irregular`. We have already provided a sketch of a scheduler, essentially doing WFQ sharing at three different nodes. Feel free to modify the weights if you wish; this is done by changing the state variables.
-4. To visualize the results of running a PCAP through this scheduler, visit [`run.ml`](test/run.ml), toggle `let _ =` to point to `extension_run`, and then run `dune test`. The results will to to temporary files, which you can ignore.
-5. Now we'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml). This functor takes a scheduler against a heterogenous topology and returns a scheduler against a regular-branching ternary topology. To see this in action, visit [`run.ml`](test/run.ml), toggle `let _ =` to point to `extension_embed_run`, and run `dune test`.
-6. To visualize the results, run `python3 pcaps/plot.py --ext`.
-Again, copy `extension*.png` out using the instructions in the [mini-guide](copying_out_of_docker.md), and compare the results.
+1. We will use the topology `flat_four` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into a ternary tree, run `dune test` and search for "extension" in the output.
+Note that we are compiling to a ternary tree, while all the examples so far have compiled to binary trees.
+This was remarkably easy: visit [`topo.ml`](lib/topo.ml) and find `build_ternary`, a one-liner!
+2. Now let's write a scheduler against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `module WFQ_Flat_Four`. We have already provided a basic WFQ scheduler. Feel free to modify the weights if you wish; this is done by changing the state variables.
+3. We'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml), which closely resembers `Alg2B` from earlier in the file.
+4. To run these schedulers against a PCAP, run `dune test`.
+5. To visualize the results, run `python3 pcaps/plot.py --ext`.
+The generated files will be called `extension.png` and `extension_ternary.png`.
+Copy `extension*.png` out using the instructions in the [mini-guide](extra.md), and compare the results.
 They should be identical although they have been generated against different topologies.
-7. We have, so far, used synthetically generated PCAPs to test our schedulers. The scripts we use to generate these are in [`pcap_gen.py`](pcaps/pcap_gen.py), and users can modify this script to generate their own PCAPs.

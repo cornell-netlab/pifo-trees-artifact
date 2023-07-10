@@ -253,7 +253,4 @@ let three_level_ternary =
 
 let irregular = Node [ Star; Star; Star; Node [ Star; Star; Star ] ]
 
-let irregular2 =
-  Node [ Node [ Star; Star ]; Star; Star; Node [ Star; Star; Star ] ]
-
-let four_wide = Node [ Star; Star; Star; Star ]
+let flat_four = Node [ Star; Star; Star; Star ]

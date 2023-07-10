@@ -41,6 +41,16 @@ def two_then_three():
     return packets
 
 
+def four_flows():
+    packets = []
+    srcs = [a, b, c, d] * 12 + [a, b]
+    for src in srcs:
+        packets += Ether(src=src, dst=dummy) / IP(src="1.1.1.1", dst="1.1.1.1")
+    for i, p in enumerate(packets):
+        p.time = i / 10
+    return packets
+
+
 def five_flows():
     packets = []
     srcs = [a, b, c, d, e] * 10
@@ -65,6 +75,7 @@ def generate_pcaps():
     wrpcap("./pcaps/three_flows.pcap", three_flows())
     wrpcap("./pcaps/three_flows_bursty.pcap", three_flows_bursty())
     wrpcap("./pcaps/two_then_three.pcap", two_then_three())
+    wrpcap("./pcaps/four_flows.pcap", four_flows())
     wrpcap("./pcaps/five_flows.pcap", five_flows())
     wrpcap("./pcaps/seven_flows.pcap", seven_flows())
 
