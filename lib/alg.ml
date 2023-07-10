@@ -483,47 +483,35 @@ module ThreePol_Ternary_Bin = Alg2B (ThreePol_Ternary)
 (* EXTENSION *)
 (*************)
 
-module WFQ_Flat_Four : Alg_t = struct
-  let scheduling_transaction s pkt =
+module Extension_Flat : Alg_t = struct
+  (* This is a simple modification of FCFS_Ternary.
+     We will mark the changes that we have made with comments.
+     There are only two.
+  *)
+  let scheduling_transaction (s : State.t) pkt =
     let time = Packet.time pkt in
-    let flow = find_flow pkt in
-    let var_last_finish = Printf.sprintf "%s_last_finish" flow in
-    let var_weight = Printf.sprintf "%s_weight" flow in
-    let weight = State.lookup var_weight s in
-    let rank_for_root, s' =
-      wfq_helper s weight var_last_finish (Packet.len pkt) time
-    in
-    let int_for_root =
-      (* Put flow A into leaf 0, flow B into leaf 1,
-         flow C into leaf 2, and flow D into leaf 3.
-      *)
-      match flow with
-      | "A" -> 0
-      | "B" -> 1
-      | "C" -> 2
-      | "D" -> 3
-      | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
-    in
-    ([ (int_for_root, rank_for_root); (0, Rank.create 0.0 time) ], s')
+    match find_flow pkt with
+    | "A" -> ([ (0, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
+    | "B" -> ([ (1, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
+    | "C" -> ([ (2, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s)
+    | "D" -> ([ (3, Rank.create 0.0 time); (0, Rank.create 0.0 time) ], s) (* new *)
+    | n -> failwith Printf.(sprintf "Don't know how to route flow %s." n)
 
-  let topology = Topo.flat_four
-
-  let init_state =
-    State.create 8
-    |> State.rebind "A_weight" 0.1
-    |> State.rebind "B_weight" 0.2
-    |> State.rebind "C_weight" 0.3
-    |> State.rebind "D_weight" 0.4
+  let topology = Topo.flat_four (* changed *)
 
   let control : Control.t =
-    { s = init_state; q = Pifotree.create topology; z = scheduling_transaction }
+    {
+      s = State.create 1;
+      q = Pifotree.create topology;
+      z = scheduling_transaction;
+    }
 
   let simulate sim_length pkts =
     Control.simulate sim_length 0.001 poprate pkts control
 end
 
 module Alg2T (Alg : Alg_t) : Alg_t = struct
-  (* We are given an algorithm of type Alg_t that runs on a heterogenous tree.
+  (* We are given an algorithm Alg that runs on a heterogenous tree.
      We will compile it to run on a ternary tree.
      The process is really very similar to Alg2B above.
   *)
@@ -545,4 +533,4 @@ module Alg2T (Alg : Alg_t) : Alg_t = struct
     Control.simulate sim_length 0.001 poprate pkts control
 end
 
-module WFQ_Flat_Four_Ternary = Alg2T (WFQ_Flat_Four)
+module Extension_Ternary = Alg2T (Extension_Flat)

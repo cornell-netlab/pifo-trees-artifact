@@ -117,22 +117,28 @@ How would you go about writing your own scheduler?
 Let us walk through a simple example.
 We will:
 1. Examine a flat 4-ary topology and see how it would be compiled into ternary form.
-2. Write a scheduler against this flat 4-ary topology.
-3. Examine a functor that compiles schedulers against flat 4-ary topologies into schedulers against ternary topologies.
-4. Run a PCAP through the handwritten scheduler and the compiled scheduler, and visualize the results.
+2. Study a simple scheduler that runs against this flat 4-ary topology.
+3. Write your own scheduler against this flat 4-ary topology.
+4. Examine a functor that compiles schedulers against flat 4-ary topologies into schedulers against ternary topologies.
+5. Run a PCAP through the handwritten scheduler and the compiled scheduler, and visualize the results.
 
 Before starting, we recommend a look through the file [`alg.ml`](lib/alg.ml).
 It has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks.
 Consider modifying a few things (e.g., in `Strict_Ternary`, change the order of strict priority; in `WFQ_Ternary`, change the weights) and re-running `dune test; python3 pcaps/plot.py` to see how the results change.
 
 
-1. We will use the topology `flat_four` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into a ternary tree, run `dune test` and search for "extension" in the output.
+1. We will use the topology `flat_four` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into ternary form, run `dune test` and search for "EXTENSION" in the output.
 Note that we are compiling to a ternary tree, while all the examples so far have compiled to binary trees.
-This was remarkably easy: visit [`topo.ml`](lib/topo.ml) and find `build_ternary`, a one-liner!
-2. Now let's write a scheduler against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `module WFQ_Flat_Four`. We have already provided a basic WFQ scheduler. Feel free to modify the weights if you wish; this is done by changing the state variables.
-3. We'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml), which closely resembers `Alg2B` from earlier in the file.
-4. To run these schedulers against a PCAP, run `dune test`.
-5. To visualize the results, run `python3 pcaps/plot.py --ext`.
+This was remarkably easy: visit [`topo.ml`](lib/topo.ml) and examine `build_ternary`.
+2. Now let's study a simple scheduler against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `module Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
+This was a simple modification of the FCFS scheduler `FCFS_Ternary` from earlier in the file, and we have marked the two changes with comments.
+3. Following this lead, can you now write a scheduler that performs WFQ scheduling? It should be similar to the scheduler `WFQ_Ternary` from earlier in the file. Copy the code from that module over, and make some small changes:
+    - You must send flow D to leaf 3.
+    - You must register some weight for flow D in the state.
+    - You must change to topoplogy to `Topo.flat_four`.
+4. Now we'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml), which closely resembers `Alg2B` from earlier in the file.
+5. To run these schedulers against a PCAP, run `dune test`. To visualize the results, run `python3 pcaps/plot.py --ext`.
 The generated files will be called `extension.png` and `extension_ternary.png`.
 Copy `extension*.png` out using the instructions in the [mini-guide](extra.md), and compare the results.
 They should be identical although they have been generated against different topologies.
+6. Feel free to iterate on this example by modifying the scheduler, or the arity of the target topology. You can even create new synthetic PCAPS using [`pcap_gen.py`](pcaps/pcap_gen.py). The visualizations are a handy guide for making sure that the behaviour of the basic scheduler is as you expect, and that the compiled scheduler is identical to the basic scheduler.
