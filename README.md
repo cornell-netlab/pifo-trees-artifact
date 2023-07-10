@@ -141,4 +141,5 @@ This was a simple modification of the FCFS scheduler `FCFS_Ternary` from earlier
 The generated files will be called `extension.png` and `extension_ternary.png`.
 Copy `extension*.png` out using the instructions in the [mini-guide](extra.md), and compare the results.
 They should be identical although they have been generated against different topologies.
-6. Feel free to iterate on this example by modifying the scheduler, or the arity of the target topology. You can even create new synthetic PCAPS using [`pcap_gen.py`](pcaps/pcap_gen.py). The visualizations are a handy guide for making sure that the behaviour of the basic scheduler is as you expect, and that the compiled scheduler is identical to the basic scheduler.
+
+Feel free to iterate on this example by modifying the scheduler, or the arity of the target topology. You can even create new synthetic PCAPS using [`pcap_gen.py`](pcaps/pcap_gen.py). The visualizations are a handy guide for making sure that the behaviour of the basic scheduler is as you expect, and that the compiled scheduler is identical to the basic scheduler.
