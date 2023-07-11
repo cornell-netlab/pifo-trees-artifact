@@ -124,13 +124,13 @@ You will:
 
 Before starting, we recommend a look through the file [`alg.ml`](lib/alg.ml).
 It has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks.
-Consider modifying a few things (e.g., in `Strict_Ternary`, change the order of strict priority; in `WFQ_Ternary`, change the weights) and re-running `dune test; python3 pcaps/plot.py` to see how the results change.
+Consider modifying a few things (e.g., in `Strict_Ternary`, change the order of strict priority; in `WFQ_Ternary`, change the weights) and re-running `dune test; python3 pcaps/plot.py` to see how the results change. You will need to copy the PNG files out again.
 
-
-1. You will use the topology `flat_four` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into ternary form, run `dune test` and search for "EXTENSION" in the output.
+1. You will use the topology `flat_four` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into ternary form, run `dune clean; dune build; dune test` and search for "EXTENSION" in the output.
 Note that you are now embedding into ternary form, while all the examples so far have embedded into binary form.
 This was accomplished using the method `build_ternary`, which we have already defined for you in [`topo.ml`](lib/topo.ml).
 There should be no need to modify this code; we just want you to see the pattern.
+> Remark: In general, `dune test` succeeds quietly when the tests' source files have not changed. To trigger a fresh run of tests anyway, we need to use `dune clean; dune build; dune test`.
 2. Now, study a simple scheduler written against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
 This is just a simple modification of the scheduler `FCFS_Ternary` from earlier in the file, and we have marked the two changes with comments.
 3. Now say you'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, you will use the straightfoward functor `Alg2T` that we have already defined for you in [`alg.ml`](lib/alg.ml). This functor closely resembles `Alg2B` from earlier in the file.
