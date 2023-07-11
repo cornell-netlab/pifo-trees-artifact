@@ -124,7 +124,7 @@ You will:
 
 Before starting, we recommend a look through the file [`alg.ml`](lib/alg.ml).
 It has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks.
-Consider modifying a few things (e.g., in `Strict_Ternary`, change the order of strict priority; in `WFQ_Ternary`, change the weights) and re-running `dune test; python3 pcaps/plot.py` to see how the results change. You will need to copy the PNG files out again.
+Consider modifying a few things (e.g., in `Strict_Ternary`, changing the order of strict priority; in `WFQ_Ternary`, changing the weights) and re-running `dune test; python3 pcaps/plot.py` to see how the results change. You will need to copy the PNG files out again.
 
 1. You will use the topology `flat_four` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into ternary form, run `dune clean; dune build; dune test` and search for "EXTENSION" in the output.
 Note that you are now embedding into ternary form, while all the examples so far have embedded into binary form.
@@ -134,7 +134,7 @@ There should be no need to modify this code; we just want you to see the pattern
 2. Now, study a simple scheduler written against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
 This is just a simple modification of the scheduler `FCFS_Ternary` from earlier in the file, and we have marked the two changes with comments.
 3. Now say you'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, you will use the straightfoward functor `Alg2T` that we have already defined for you in [`alg.ml`](lib/alg.ml). This functor closely resembles `Alg2B` from earlier in the file.
-There should be no need to modify this code; we just want you to see the pattern.
+Again, there should be no need to modify this code; just observe the pattern.
 4. To run a PCAP through these two schedulers, run `dune test`. To visualize the results, run `python3 pcaps/plot.py --ext`.
 The generated files will be called `extension.png` and `extension_ternary.png`.
 Copy these files out using the instructions in the [mini-guide](extra.md), and compare the results.
@@ -146,4 +146,10 @@ They should be identical although they have been generated against different top
     - Remember to retain the module name: `Extension_Flat`.
 6. Repeat step 4 to view your results!
 
-Feel free to iterate on this example by modifying the scheduler, or the arity of the target topology. You can even create new synthetic PCAPS using [`pcap_gen.py`](pcaps/pcap_gen.py). The visualizations are a handy guide for making sure that the behaviour of the basic scheduler is as you expect, and that the compiled scheduler is identical to the basic scheduler.
+Feel free to iterate on this! There are several levers you can play with, either in combination or in isolation:
+- Modify the source topology, following the lead of the other examples in [`topo.ml`](lib/topo.ml).
+- Modify the handwritten scheduler, following the lead of the other examples in [`alg.ml`](lib/alg.ml).
+- Modify the arity of the target topology, extending the pattern you have seen (the functions `build_binary`, `build_ternary`, ... and the matching functors `Alg2B`, `Alg2T`, ...).
+- You can even create new synthetic PCAPS using [`pcap_gen.py`](pcaps/pcap_gen.py).
+
+In general, we think the visualizations are a handy guide for making sure that the behaviour of the basic scheduler is as you expect, and that the compiled scheduler behaves the same as the basic scheduler.
