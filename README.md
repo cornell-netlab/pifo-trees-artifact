@@ -118,9 +118,9 @@ Let us walk through a simple example.
 You will:
 1. Examine a flat 4-ary topology and see how it would be compiled into ternary form.
 2. Study a simple scheduler that runs against this flat 4-ary topology.
-3. Write your own scheduler against this flat 4-ary topology.
-4. Examine a functor that compiles schedulers against flat 4-ary topologies into schedulers against ternary topologies.
-5. Run a PCAP through the handwritten scheduler and the compiled scheduler, and visualize the results.
+3. Examine a functor that compiles schedulers against flat 4-ary topologies into schedulers against ternary topologies.
+4. Run a PCAP through the handwritten scheduler and the compiled scheduler, and visualize the results.
+5. Write your own scheduler against this flat 4-ary topology.
 
 Before starting, we recommend a look through the file [`alg.ml`](lib/alg.ml).
 It has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks.
