@@ -130,17 +130,17 @@ Consider modifying a few things (e.g., in `Strict_Ternary`, change the order of 
 1. We will use the topology `flat_four` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into ternary form, run `dune test` and search for "EXTENSION" in the output.
 Note that we are compiling to a ternary tree, while all the examples so far have compiled to binary trees.
 This was remarkably easy: visit [`topo.ml`](lib/topo.ml) and examine `build_ternary`.
-2. Now let's study a simple scheduler against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `module Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
-This was a simple modification of the FCFS scheduler `FCFS_Ternary` from earlier in the file, and we have marked the two changes with comments.
-3. Following this lead, can you now write a scheduler that performs WFQ scheduling? It should be similar to the scheduler `WFQ_Ternary` from earlier in the file. Copy the code from that module over, and make some small changes:
-    - You must send flow D to leaf 3.
-    - You must register some weight for flow D in the state.
-    - You must change to topology to `Topo.flat_four`.
-    - Remember to retain the module name: `Extension_Flat`.
-4. Now we'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml), which closely resembers `Alg2B` from earlier in the file.
-5. To run these schedulers against a PCAP, run `dune test`. To visualize the results, run `python3 pcaps/plot.py --ext`.
+2. Let us study a simple scheduler against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
+This is just a simple modification of the scheduler `FCFS_Ternary` from earlier in the file, and we have marked the two changes with comments.
+3. Now we'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, we will use the straightfoward functor `Alg2T` in [`alg.ml`](lib/alg.ml), which closely resembers `Alg2B` from earlier in the file.
+4. To run a PCAP through these schedulers, run `dune test`. To visualize the results, run `python3 pcaps/plot.py --ext`.
 The generated files will be called `extension.png` and `extension_ternary.png`.
 Copy `extension*.png` out using the instructions in the [mini-guide](extra.md), and compare the results.
 They should be identical although they have been generated against different topologies.
+5. Following this lead, can you now go back to [`alg.ml`](lib/alg.ml)'s `Extension_Flat` and modify it to perform WFQ scheduling? It should be similar to the module `WFQ_Ternary` from earlier in the file. Copy the code from that module over, and make some small changes:
+    - You must send flow D to leaf 3.
+    - You must register some weight for flow D in the state.
+    - You must change the topology to `Topo.flat_four`.
+    - Remember to retain the module name: `Extension_Flat`.
 
 Feel free to iterate on this example by modifying the scheduler, or the arity of the target topology. You can even create new synthetic PCAPS using [`pcap_gen.py`](pcaps/pcap_gen.py). The visualizations are a handy guide for making sure that the behaviour of the basic scheduler is as you expect, and that the compiled scheduler is identical to the basic scheduler.
