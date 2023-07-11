@@ -130,7 +130,7 @@ Consider modifying a few things (e.g., in `Strict_Ternary`, change the order of 
 Note that you are now embedding into ternary form, while all the examples so far have embedded into binary form.
 This was accomplished using the method `build_ternary`, which we have already defined for you in [`topo.ml`](lib/topo.ml).
 There should be no need to modify this code; we just want you to see the pattern.
-> Remark: In general, `dune test` succeeds quietly when the tests' source files have not changed. When only a subset of tests have their source files changed, only those get re-run. To trigger a fresh run of tests anyway, we need to use `dune clean; dune build; dune test`.
+> Remark: In general, `dune test` succeeds quietly when the tests' source files have not changed. When only a subset of tests' source files have changed, only those tests get re-run. To trigger a fresh run of tests anyway, we need to use `dune clean; dune build; dune test`.
 2. Now, study a simple scheduler written against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
 This is just a simple modification of the scheduler `FCFS_Ternary` from earlier in the file, and we have marked the two changes with comments.
 3. Now say you'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, you will use the straightfoward functor `Alg2T` that we have already defined for you in [`alg.ml`](lib/alg.ml). This functor closely resembles `Alg2B` from earlier in the file.
