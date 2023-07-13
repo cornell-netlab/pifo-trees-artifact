@@ -1,6 +1,8 @@
 
 # Formal Abstractions for Packet Scheduling
 
+This is an artifact in support of our paper _Formal Abstractions for Packet Scheduling_.
+
 ## Installation
 
 ### In the Docker Container
@@ -25,7 +27,8 @@ Installation is straightforward if you use our [package](https://github.com/corn
 
 ## Overview
 
-This is an artifact in support of our [paper](https://arxiv.org/abs/2211.11659) _Formal Abstractions for Packet Scheduling_.
+This artifact supports our paper in the following ways:
+
 1. It implements several key definitions from the paper.
 2. It implements the embedding algorithm described in Theorem 6.1, and shows how to lift this embedding to operate on schedulers.
 3. It generates the visualizations that we show in Section 7.
@@ -92,7 +95,7 @@ Next, to see how the above can be orchestrated to convert _schedulers_ written a
 Run `dune test`. This will pretty-print some sample non-binary topologies along with automatically generated embeddings of these topologies into binary form.
 
 This is exactly the algorithm that we sketch in Theorem 6.1.
-The first topology that we pretty-print is the same as Fig 3a in the paper, and the second is the same as Fig 3b.
+In particular, the first topology that we pretty-print is the same as Fig 3a in the paper, and the second is the same as Fig 3b.
 
 
 ### Running Handwritten Schedulers, Compiled Schedulers, and Visualizing the Results
