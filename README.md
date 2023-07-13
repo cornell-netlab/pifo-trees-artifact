@@ -102,16 +102,46 @@ In particular, the first topology that we pretty-print is the same as Fig 3a in 
 
 Running `dune test` above has already run a few simulations for us.
 In particular:
-1. It has run a number of PCAPS through a number of handwritten schedulers against handwritten ternary topologies. It has saved the results as CSV files, which we can ignore for now.
-2. It has also run the same PCAPS through automatically generated versions of the above schedulers, now running against automatically generated _binary_ topologies. Again, it has saved the results as CSV files, which we can ignore for now.
+1. It has run a number of PCAPS through a number of handwritten schedulers against handwritten ternary topologies. It has saved the results as CSV files, which we can ignore.
+2. It has also run the same PCAPS through automatically generated versions of the above schedulers, now running against automatically generated _binary_ topologies. Again, it has saved the results as CSV files, which we can ignore.
 
 To visualize the results, run `python3 pcaps/plot.py`.
 
-This will access our temporary files and run them through our visualizer, generating a number of PNG files. We supply a [mini-guide](extra.md) showing you how to copy these PNG files out of the Docker container. The PNG files generated are exactly as shown in tables 1, 2, and 3 of the paper, and are named `alg_name.png` or `alg_name_bin.png` depending on whether they were generated against a handwritten topology or a binary topology.
+This will access our CSV files and run them through our visualizer, generating a number of PNG files. If using the Docker container, take a look at our [mini-guide](extra.md) that shows you how to copy these PNG files out so you can look at them.
 
-Note that, for all `alg_name`, the files `alg_name.png` and `alg_name_bin.png` look the same; this is exactly the point of our compilation algorithm: we have moved automatically to an entirely new (binary) topology, but have observed no appreciable loss in performance or change in behavior.
+The PNG files are named `alg_name.png` or `alg_name_bin.png` depending on whether they were generated against a handwritten topology or an automatically generated binary topology.
+For all `alg_name`, the files `alg_name.png` and `alg_name_bin.png` look the same; this is exactly the point of our compilation algorithm: we have moved automatically to an entirely new (binary) topology, but have observed no appreciable loss in performance or change in behavior.
 
-Note also that there is no second version of HPFQ, as it is already a binary scheduler. The point of this visualization is to show a scheduling algorithm that could not have been achieved without a hierarchical PIFO tree. It is impossible to implement this scheduler using a PIFO or using a flat ternary PIFO tree: tall skinny trees are more expressive than short fat trees.
+The PNG files generated correspond to the visualizations in Section 7 of the paper.
+
+#### Table 1
+
+The first row shows `fcfs.png` (or equivalently, `fcfs_bin.png`, which is identical)
+in the left-hand column.
+As a point of comparison, the right-hand column visualizes an FCFS routine running on an actual hardware switch that schedules packets by orchestrating a number of FIFOs.
+
+The remaining rows show `strict.png` (or equivalently, `strict_bin.png`), `rr.png` (or equivalently, `rr_bin.png`), and `wfq.png` (or equivalently, `wfq_bin.png`), along with their hardware counterparts.
+
+We do not provide a way for the AEC to generate the traces for the hardware switch for two reasons:
+1. There are licensing issues because of the proprietary nature of the hardware switch itself.
+2. The hardware implementation (i.e., the entire right-hand column of table 1) is not novel, and is not the point of this table.
+The right-hand column is just a realistic _baseline_, and the point of this experiment is made in the table's left-hand column: PIFO trees can approximate the behavior of a production hardware switch.
+
+#### Table 2
+
+This table shows `hpfq.png`.
+There is no binary version: it is already run against a binary topology, which we sketch.
+The point of this visualization is to demonstrate a scheduling algorithm that could not have been achieved without a hierarchical PIFO tree.
+It is impossible to implement this scheduler using a single PIFO or even using a flat ternary PIFO tree: tall skinny trees are more expressive than short fat trees.
+
+#### Table 3
+
+This table visualizes, more clearly, the result of embedding a ternary topology into a binary topology.
+The first row shows `twopol.png` along with the topology it was run against,
+and the second row shows `twopol_bin.png` along with the automatically generated topology _it_ was run against.
+Similarly, the third row visualizes `threepol.png` and the fourth row visualizes `threepol_bin.png`.
+In the sketches of topologies, newly introduced "transit" nodes are shown in gray and labeled with a `T`.
+Despite the change in topology, the behavior of the scheduler does not change.
 
 
 ## Extension
