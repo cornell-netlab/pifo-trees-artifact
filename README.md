@@ -41,9 +41,9 @@ The first three feautures are in support of the _Functional_ badge, while the la
 ### Basic
 
 First, we introduce the basic constructs from Sections 1 through 4:
-1. `Topo` is defined in [`topo.ml`](lib/topo.ml). The file also contains a few handwritten topologies.
-2. `Path` is defined in [`path.ml`](lib/path.ml).
-3. `PIFOTree` is defined in [`pifotree.ml`](lib/pifotree.ml).
+1. `Topo` is defined in [`lib/topo.ml`](lib/topo.ml). The file also contains a few handwritten topologies.
+2. `Path` is defined in [`lib/path.ml`](lib/path.ml).
+3. `PIFOTree` is defined in [`lib/pifotree.ml`](lib/pifotree.ml).
 
    The same file also contains:
     - `pop`
@@ -54,16 +54,16 @@ First, we introduce the basic constructs from Sections 1 through 4:
     - `flush`
     - `create`, which builds a `PIFOTree` from a `Topo`.
 
-4. `Control` is defined in [`control.ml`](lib/control.ml). The file also contains `sched_t`, which is the type of all scheduling transactions.
+4. `Control` is defined in [`lib/control.ml`](lib/control.ml). The file also contains `sched_t`, which is the type of all scheduling transactions.
 
-5. Scheduling transactions are written by hand (in [`alg.ml`](lib/alg.ml)).
-To see how scheduling transactions may be created and how controls may be generated atop of these, study a simple example such as FCFS in [`alg.ml`](lib/alg.ml).
+5. Scheduling transactions are written by hand (in [`lib/alg.ml`](lib/alg.ml)).
+To see how scheduling transactions may be created and how controls may be generated atop of these, study a simple example such as FCFS in [`lib/alg.ml`](lib/alg.ml).
 
-6. To guide intuition and aid debugging, we have `simulate`, which runs a given list of packets through a given control. Note that this is different from the relation _simulation_ defined in the paper, which is a formal statement about one PIFO tree being able to mimic the behavios or another. The `simulate` function lives in [`control.ml`](lib/control.ml).
+6. To guide intuition and aid debugging, we have `simulate`, which runs a given list of packets through a given control. Note that this is different from the relation _simulation_ defined in the paper, which is a formal statement about one PIFO tree being able to mimic the behavios or another. The `simulate` function lives in [`lib/control.ml`](lib/control.ml).
 
 ### Advanced
 
-Now let us visit the definitions and methods that pertain to the embedding algorithm. These all live in [`topo.ml`](lib/topo.ml). Look out for:
+Now let us visit the definitions and methods that pertain to the embedding algorithm. These all live in [`lib/topo.ml`](lib/topo.ml). Look out for:
 1. `Addr`, which is how we walk down a topology and identify a particular node.
 2. The homomorphic embedding of one topology into another, written `f : Addr -> Addr` in Definition 5.2 of the paper. In the code it is called `map`.
 3. Given a map `f`, we can lift it to operate over paths, as discussed in Definition 5.8 of the paper. This lifting function is called `lift_tilde` in the code. It creates `f-tilde: Path -> Path`.
@@ -74,7 +74,7 @@ Now let us visit the definitions and methods that pertain to the embedding algor
 ### Embedding Topologies
 
 One of the contributions of the paper is an embedding algorithm that safely takes us one from one topology to another.
-That is implemented as `build_d_ary` in [`topo.ml`](lib/topo.ml).
+That is implemented as `build_d_ary` in [`lib/topo.ml`](lib/topo.ml).
 
 This function takes a source topology, which may be heterogenous, and returns two things:
 1. The target topology, which is a regular-branching d-ary topology (for the chosen `d`).
@@ -84,7 +84,7 @@ It is implemented as described in Theorem 6.1 of the paper.
 
 ### Compiling Schedulers
 
-Next, to see how the above can be orchestrated to convert _schedulers_ written against heterogenous topologies into _schedulers_ running against d-ary topologies, study the functors `Alg2B` (where `d=2`) and `Alg2T` (where `d=3`) in [`alg.ml`](lib/alg.ml). These proceed as described in Theorem 5.10 of the paper.
+Next, to see how the above can be orchestrated to convert _schedulers_ written against heterogenous topologies into _schedulers_ running against d-ary topologies, study the functors `Alg2B` (where `d=2`) and `Alg2T` (where `d=3`) in [`lib/alg.ml`](lib/alg.ml). These proceed as described in Theorem 5.10 of the paper.
 
 
 ## Visualizations
@@ -155,24 +155,24 @@ You will:
 4. Run a PCAP through the handwritten scheduler and the compiled scheduler, and visualize the results.
 5. Write your own scheduler against this flat 4-ary topology.
 
-Before starting, we recommend a look through the file [`alg.ml`](lib/alg.ml).
+Before starting, we recommend a look through the file [`lib/alg.ml`](lib/alg.ml).
 It has been written with a pedagogical intent: it is heavily commented, and the earlier schedulers spell out their work with few, if any, fancy tricks.
 Consider modifying a few things (e.g., in `Strict_Ternary`, changing the order of strict priority; in `WFQ_Ternary`, changing the weights) and re-running `dune test; python3 pcaps/plot.py` to see how the results change. You will need to copy the PNG files out again.
 
-1. You will use the topology `flat_four` in [`topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into ternary form, run `dune clean; dune build; dune test` and search for "EXTENSION" in the output.
+1. You will use the topology `flat_four` in [`lib/topo.ml`](lib/topo.ml). To see this topology pretty-printed, and to see how this topology would be embedded into ternary form, run `dune clean; dune build; dune test` and search for "EXTENSION" in the output.
 Note that you are now embedding into ternary form, while all the examples so far have embedded into binary form.
-This was accomplished using the method `build_ternary`, which we have already defined for you in [`topo.ml`](lib/topo.ml).
+This was accomplished using the method `build_ternary`, which we have already defined for you in [`lib/topo.ml`](lib/topo.ml).
 There should be no need to modify this code; we just want you to see the pattern.
 > Remark: In general, `dune test` succeeds quietly when the tests' source files have not changed. When only a subset of tests' source files have changed, only those tests get re-run. To trigger a fresh run of tests anyway, we need to use `dune clean; dune build; dune test`.
-2. Now, study a simple scheduler written against this flat 4-ary topology. Visit [`alg.ml`](lib/alg.ml) and find `Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
+2. Now, study a simple scheduler written against this flat 4-ary topology. Visit [`lib/alg.ml`](lib/alg.ml) and find `Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
 This is just a simple modification of the scheduler `FCFS_Ternary` from earlier in the file, and we have marked the two changes with comments.
-3. Now say you'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, you will use the straightfoward functor `Alg2T` that we have already defined for you in [`alg.ml`](lib/alg.ml). This functor closely resembles `Alg2B` from earlier in the file.
+3. Now say you'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, you will use the straightfoward functor `Alg2T` that we have already defined for you in [`lib/alg.ml`](lib/alg.ml). This functor closely resembles `Alg2B` from earlier in the file.
 Again, there should be no need to modify this code; just observe the pattern.
 4. To run a PCAP through these two schedulers, run `dune test`. To visualize the results, run `python3 pcaps/plot.py --ext`.
 The generated files will be called `extension.png` and `extension_ternary.png`.
 Copy these files out using the instructions in the [mini-guide](extra.md), and compare the results.
 They should be identical although they have been generated against different topologies.
-5. Following this lead, can you now go back to [`alg.ml`](lib/alg.ml)'s `Extension_Flat` and modify it to perform WFQ scheduling? It should be similar to the module `WFQ_Ternary` from earlier in the file. Copy the code from that module over, and make some small changes:
+5. Following this lead, can you now go back to [`lib/alg.ml`](lib/alg.ml)'s `Extension_Flat` and modify it to perform WFQ scheduling? It should be similar to the module `WFQ_Ternary` from earlier in the file. Copy the code from that module over, and make some small changes:
     - You must send flow D to leaf 3.
     - You must register some weight for flow D in the state.
     - You must change the topology to `Topo.flat_four`.
@@ -180,8 +180,8 @@ They should be identical although they have been generated against different top
 6. Repeat step 4 to view your results!
 
 Feel free to iterate on this! There are several levers you can play with, either in combination or in isolation:
-- Modify the source topology, following the lead of the other examples in [`topo.ml`](lib/topo.ml).
-- Modify the handwritten scheduler, following the lead of the other examples in [`alg.ml`](lib/alg.ml).
+- Modify the source topology, following the lead of the other examples in [`lib/topo.ml`](lib/topo.ml).
+- Modify the handwritten scheduler, following the lead of the other examples in [`lib/alg.ml`](lib/alg.ml).
 - Modify the arity of the target topology, extending the pattern you have seen (the functions `build_binary`, `build_ternary`, ... and the matching functors `Alg2B`, `Alg2T`, ...).
 - You can even create new synthetic PCAPS using [`pcap_gen.py`](pcaps/pcap_gen.py).
 
