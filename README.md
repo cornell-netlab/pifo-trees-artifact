@@ -3,16 +3,18 @@
 
 This is an artifact in support of our paper _Formal Abstractions for Packet Scheduling_.
 
-## Installation
+## Getting Started
 
-### In the Docker Container
+### Installation
+
+#### In the Docker Container
 
 Installation is straightforward if you use our [package](https://github.com/cornell-netlab/pifo-trees-artifact/pkgs/container/pifo-trees):
 1. `docker pull ghcr.io/cornell-netlab/pifo-trees:latest`
 2. `docker run -it --rm ghcr.io/cornell-netlab/pifo-trees:latest`
 3. Then, in the container, run `dune build` to build the project.
 
-### To Build Locally
+#### To Build Locally
 
 1. Install our prerequisites:
     - opam, version 2.1.4 or higher
@@ -24,8 +26,14 @@ Installation is straightforward if you use our [package](https://github.com/corn
 3. Run `opam install . --deps-only` to install further OCaml dependencies.
 4. Run `dune build` to build the project.
 
+### Running the Artifact
 
-## Overview
+1. Run `dune test` to run the tests. You should see some pretty-printed treee topologies.
+2. Run `python3 pcaps/plot.py` to generate the basic visualizations.
+3. Run `python3 pcaps/plot.py --ext` to generate the visualizations for the extension.
+4. If you see a number of PNG files in the home directory, you have successfully kicked the tires! See below for a detailed explanation of what you are seeing.
+
+## Step-by-Step Instructions
 
 This artifact supports our paper in the following ways:
 
@@ -97,6 +105,8 @@ Run `dune test`. This will pretty-print some sample non-binary topologies along 
 This is exactly the algorithm that we sketch in Theorem 6.1.
 In particular, the first topology that we pretty-print is the same as Fig 3a in the paper, and the second is the same as Fig 3b.
 
+> Remark: In general, `dune test` succeeds quietly when the tests' source files have not changed. When only a subset of tests' source files have changed, only those tests get re-run. If `dune test` seems to have no effect, run `dune clean; dune build; dune test` to trigger a fresh run of tests anyway.
+
 
 ### Running Handwritten Schedulers, Compiled Schedulers, and Visualizing the Results
 
@@ -165,7 +175,6 @@ Consider modifying a few things (e.g., in `Strict_Ternary`, changing the order o
 Note that you are now embedding into ternary form, while all the examples so far have embedded into binary form.
 This was accomplished using the method `build_ternary`, which we have already defined for you in [`lib/topo.ml`](lib/topo.ml).
 There should be no need to modify this code; we just want you to see the pattern.
-> Remark: In general, `dune test` succeeds quietly when the tests' source files have not changed. When only a subset of tests' source files have changed, only those tests get re-run. To trigger a fresh run of tests anyway, we need to use `dune clean; dune build; dune test`.
 2. Now, study a simple scheduler written against this flat 4-ary topology. Visit [`lib/alg.ml`](lib/alg.ml) and find `Extension_Flat`. We have already provided a basic scheduler that performs FCFS scheduling.
 This is just a simple modification of the scheduler `FCFS_Ternary` from earlier in the file, and we have marked the two changes with comments.
 3. Now say you'd like to compile this scheduler to run against a regular-branching ternary topology. To do this, you will use the straightfoward functor `Alg2T` that we have already defined for you in [`lib/alg.ml`](lib/alg.ml). This functor closely resembles `Alg2B` from earlier in the file.
