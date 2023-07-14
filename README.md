@@ -28,7 +28,7 @@ Installation is straightforward if you use our [package](https://github.com/corn
 
 ### Running the Artifact
 
-1. Run `dune test` to run the tests. You should see some pretty-printed treee topologies.
+1. Run `dune test` to run the tests. You should see some pretty-printed tree topologies.
 2. Run `python3 pcaps/plot.py` to generate the basic visualizations.
 3. Run `python3 pcaps/plot.py --ext` to generate the visualizations for the extension.
 4. If you see a number of PNG files in the home directory, you have successfully kicked the tires! The rest of this document explains what you have just done and how to extend it.
@@ -105,7 +105,7 @@ Run `dune test`. This will pretty-print some sample non-binary topologies along 
 This is exactly the algorithm that we sketch in Theorem 6.1.
 In particular, the first topology that we pretty-print is the same as Fig 3a in the paper, and the second is the same as Fig 3b.
 
-> Remark: In general, `dune test` succeeds quietly when the tests' source files have not changed. When only a subset of tests' source files have changed, only those tests get re-run. If `dune test` seems to have no effect, run `dune clean; dune build; dune test` to trigger a fresh run of tests anyway.
+> Remark: In general, repeated runs of `dune test` succeed quietly when the tests' source files have not changed. When only a subset of tests' source files have changed, only those tests get re-run. If `dune test` seems to have no effect, run `dune clean; dune build; dune test` to trigger a fresh run of tests anyway.
 
 
 ### Running Handwritten Schedulers, Compiled Schedulers, and Visualizing the Results
