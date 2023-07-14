@@ -123,9 +123,11 @@ As a point of comparison, the right-hand column visualizes an FCFS routine runni
 The remaining rows show `strict.png` (or equivalently, `strict_bin.png`), `rr.png` (or equivalently, `rr_bin.png`), and `wfq.png` (or equivalently, `wfq_bin.png`), along with their hardware counterparts.
 
 We do not provide a way for the AEC to generate the traces for the hardware switch for two reasons:
-1. There are licensing issues because of the proprietary nature of the hardware switch itself.
-2. The hardware implementation (i.e., the entire right-hand column of table 1) is not novel, and is not the point of this table.
-The right-hand column is just a realistic _baseline_, and the point of this experiment is made in the table's left-hand column: PIFO trees can approximate the behavior of a production hardware switch.
+1. We do not claim the hardware implementation (i.e., the right-hand column of table 1) as a novel research contribution. The right-hand column is included as a realistic _baseline_.
+The main point of this experiment is made in the table’s left-hand column: PIFO trees can approximate the behavior of standard scheduling algorithms, as realized on a production-grade hardware switch.
+2. In addition, the hardware switch is a proprietary  product.
+We use it under the terms of Intel’s university research program.
+We are not certain whether we could legally provide anonymous, remote access without violating the terms of our software license and NDA.
 
 #### Table 2
 
