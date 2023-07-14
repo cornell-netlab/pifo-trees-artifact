@@ -31,7 +31,7 @@ Installation is straightforward if you use our [package](https://github.com/corn
 1. Run `dune test` to run the tests. You should see some pretty-printed treee topologies.
 2. Run `python3 pcaps/plot.py` to generate the basic visualizations.
 3. Run `python3 pcaps/plot.py --ext` to generate the visualizations for the extension.
-4. If you see a number of PNG files in the home directory, you have successfully kicked the tires! See below for a detailed explanation of what you are seeing.
+4. If you see a number of PNG files in the home directory, you have successfully kicked the tires! The rest of this document explains what you have just done and how to extend it.
 
 ## Step-by-Step Instructions
 
