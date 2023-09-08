@@ -188,8 +188,11 @@ This is just a simple modification of the scheduler `FCFS_Ternary` from earlier 
 Again, there should be no need to modify this code; just observe the pattern.
 4. To run a PCAP through these two schedulers, run `dune test`. To visualize the results, run `python3 pcaps/plot.py --ext`.
 The generated files will be called `extension.png` and `extension_ternary.png`.
-Copy these files out using the instructions in the [mini-guide](extra.md), and compare the results.
-They should be identical although they have been generated against different topologies.
+Copy these files out using the instructions in the [mini-guide](extra.md), and compare the results. For easy reference: you will need something like:
+```bash
+for f in extension extension_ternary; do docker cp "CONTAINER_ID_HERE:/home/opam/pifo-trees-artifact/${f}.png" .; done
+```
+The images should be identical although they have been generated against different topologies.
 5. Following this lead, can you now go back to [`lib/alg.ml`](lib/alg.ml)'s `Extension_Flat` and modify it to perform WFQ scheduling? It should be similar to the module `WFQ_Ternary` from earlier in the file. Copy the code from that module over, and make some small changes:
     - You must send flow D to leaf 3.
     - You must register some weight for flow D in the state.
