@@ -115,9 +115,16 @@ In particular:
 1. It has run a number of PCAPS through a number of handwritten schedulers against handwritten ternary topologies. It has saved the results as CSV files, which we can ignore.
 2. It has also run the same PCAPS through automatically generated versions of the above schedulers, now running against automatically generated _binary_ topologies. Again, it has saved the results as CSV files, which we can ignore.
 
-To visualize the results, run `python3 pcaps/plot.py`.
+To visualize the results, run `python3 pcaps/plot.py`. This will access our CSV files and run them through our visualizer, generating a number of PNG files.
 
-This will access our CSV files and run them through our visualizer, generating a number of PNG files. If using the Docker container, take a look at our [mini-guide](extra.md) that shows you how to copy these PNG files out so you can look at them.
+If using the Docker container, you will need to copy these images out to your host in order to view them. From your host machine, you will need to run something like
+
+    ```bash
+    for f in fcfs fcfs_bin hpfq rr rr_bin strict strict_bin threepol threepol_bin twopol twopol_bin wfq wfq_bin; do docker cp
+    "CONTAINER_ID_HERE:/home/opam/pifo-trees-artifact/${f}.png" .; done
+    ```
+
+Please take a look at our [mini-guide](extra.md), where we walk through this process in more detail, including extracting the Docker container's ID.
 
 The PNG files are named `<alg_name>.png` or `<alg_name>_bin.png` depending on whether they were generated against a handwritten topology or an automatically generated binary topology.
 For all `<alg_name>`, the files `<alg_name>.png` and `<alg_name>_bin.png` look the same; this is exactly the point of our compilation algorithm: we have moved automatically to an entirely new (binary) topology, but have observed no appreciable loss in performance or change in behavior.
