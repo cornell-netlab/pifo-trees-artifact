@@ -119,10 +119,10 @@ To visualize the results, run `python3 pcaps/plot.py`. This will access our CSV 
 
 If using the Docker container, you will need to copy these images out to your host in order to view them. From your host machine, you will need to run something like
 
-    ```bash
-    for f in fcfs fcfs_bin hpfq rr rr_bin strict strict_bin threepol threepol_bin twopol twopol_bin wfq wfq_bin; do docker cp
-    "CONTAINER_ID_HERE:/home/opam/pifo-trees-artifact/${f}.png" .; done
-    ```
+```bash
+for f in fcfs fcfs_bin hpfq rr rr_bin strict strict_bin threepol threepol_bin twopol twopol_bin wfq wfq_bin; do docker cp
+"CONTAINER_ID_HERE:/home/opam/pifo-trees-artifact/${f}.png" .; done
+```
 
 Please take a look at our [mini-guide](extra.md), where we walk through this process in more detail, including extracting the Docker container's ID.
 
