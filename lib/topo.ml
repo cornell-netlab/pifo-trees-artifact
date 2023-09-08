@@ -214,14 +214,14 @@ let rec lift_tilde (f : map_t) tree (path : Path.t) =
   *)
   match (tree, path) with
   | Star, [ _ ] ->
-      (* When the toplogy is a star, the embedded topology is also a Star.
-         The path better be a singleton; we can check with via pattern-matching.
+      (* When the toplogy is a Star, the embedded topology is also a Star.
+         The path better be a singleton; we have checked this via pattern-matching.
          We return the path unchanged.
       *)
       path
   | Node ts, (i, r) :: pt ->
       (* When the topology is a node, the embedded topology is a node.
-         The path better be a non-empty list; we can check with via pattern-matching.
+         The path better be a non-empty list; we have checked this via pattern-matching.
          If this node embeds into node' in the embedded topology,
          this node's ith child embeds somewhere under node' in the embedded topology.
       *)

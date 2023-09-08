@@ -145,6 +145,10 @@ The main point of this experiment is made in the table’s left-hand column: PIF
 We use it under the terms of Intel’s university research program.
 We are not certain whether we could legally provide anonymous, remote access without violating the terms of our software license and NDA.
 
+An interested user could, however, reproduce this behavior by setting up a testbed as we describe -- two machines connected by a programmable switch -- and requesting the appropriate scheduling algorithm from their programmable switch.
+In order to use our visualization scripts and generate the graphs that we show, the user will also need to "punch in" and "punch out" the packets as they enter and leave the switch, respectively.
+
+
 #### Table 2
 
 This table shows `hpfq.png`.
