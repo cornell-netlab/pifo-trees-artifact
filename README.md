@@ -14,7 +14,7 @@ Installation is straightforward if you use our [package](https://github.com/corn
 2. `docker run -it --rm ghcr.io/cornell-netlab/pifo-trees:latest`
 3. Then, in the container, run `dune build` to build the project.
 
-> Note, we have recevied reports of an (ignorable) warning when running these instructions on a M2 "Apple Silicon" Macs: `WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested`. You should receive no further warnings or errors after this one warning.
+> Note, we have recevied reports of an (ignorable) warning when running these instructions on an M2 "Apple Silicon" Mac: `WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested`. You should receive no further warnings or errors after this one warning.
 
 #### To Build Locally
 
